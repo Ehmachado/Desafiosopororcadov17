@@ -97,7 +97,15 @@ const ControleDiario = () => {
 
           {prefixosUnicos.length === 0 && (
             <div style={{ padding: '16px', background: '#d1ecf1', borderRadius: '8px', color: '#0c5460', fontSize: '14px' }}>
-              Carregue carteiras no Campo 2 ou adicione dados de realizado no Campo 5 primeiro
+              <p style={{ marginBottom: '8px' }}><strong>Nenhum prefixo encontrado.</strong></p>
+              <p>Para habilitar o controle diário:</p>
+              <ul style={{ marginLeft: '20px', marginTop: '8px' }}>
+                <li>Carregue carteiras no Campo 2 (Base Mestre), OU</li>
+                <li>Adicione dados de realizado no Campo 5 (Realizado por Tipo)</li>
+              </ul>
+              <p style={{ marginTop: '12px', fontSize: '13px', opacity: 0.8 }}>
+                Debug: {carteiras.length} carteiras | {realizadosTipo.length} realizados
+              </p>
             </div>
           )}
 
