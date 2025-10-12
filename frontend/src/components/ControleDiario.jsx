@@ -111,6 +111,9 @@ const ControleDiario = () => {
 
           {prefixosUnicos.length > 0 && produtosComVidinha.length > 0 && (
             <div>
+              <div style={{ marginBottom: '16px', padding: '12px', background: '#d4edda', borderRadius: '8px', color: '#155724' }}>
+                <strong>✓ {prefixosUnicos.length} prefixos encontrados:</strong> {prefixosUnicos.join(', ')}
+              </div>
               <div style={{ marginBottom: '16px', maxHeight: '400px', overflowY: 'auto' }}>
                 <table className="data-table">
                   <thead>
