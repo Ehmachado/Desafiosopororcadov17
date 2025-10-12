@@ -88,7 +88,7 @@ const ControleDiario = () => {
 
           {prefixosUnicos.length === 0 && (
             <div style={{ padding: '16px', background: '#d1ecf1', borderRadius: '8px', color: '#0c5460', fontSize: '14px' }}>
-              Adicione dados de realizado no Campo 5 primeiro para habilitar o controle diário
+              Carregue carteiras no Campo 2 ou adicione dados de realizado no Campo 5 primeiro
             </div>
           )}
 
