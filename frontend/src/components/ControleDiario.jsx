@@ -47,6 +47,15 @@ const ControleDiario = () => {
   const prefixosDeCarteiras = [...new Set(carteiras.map(c => c.prefixo).filter(Boolean))];
   const prefixosDeRealizados = [...new Set(realizadosTipo.map(r => r.prefixo).filter(Boolean))];
   const prefixosUnicos = [...new Set([...prefixosDeCarteiras, ...prefixosDeRealizados])].sort();
+  
+  // Debug info
+  console.log('Campo 7 Debug:', {
+    carteiras: carteiras.length,
+    realizadosTipo: realizadosTipo.length,
+    prefixosDeCarteiras,
+    prefixosDeRealizados,
+    prefixosUnicos
+  });
 
   const getRealizadoAcumulado = (prefixo, produto, ateDia) => {
     return realizadosTipo
