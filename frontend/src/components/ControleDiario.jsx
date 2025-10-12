@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 const ControleDiario = () => {
   const [diasDesafio] = useLocalStorage('challenge_dias', 30);
   const [produtos] = useLocalStorage('challenge_produtos', []);
+  const [carteiras] = useLocalStorage('carteiras_master', []);
   const [realizadosTipo, setRealizadosTipo] = useLocalStorage('realizados_tipo', []);
   const [diaAtual, setDiaAtual] = useState(1);
   const [valoresDia, setValoresDia] = useState({});
@@ -42,7 +43,10 @@ const ControleDiario = () => {
     toast.success(`Dados do dia ${diaAtual} salvos!`);
   };
 
-  const prefixosUnicos = [...new Set(realizadosTipo.map(r => r.prefixo).filter(Boolean))];
+  // Pegar prefixos únicos das carteiras OU dos dados já salvos no Campo 5
+  const prefixosDeCarteiras = [...new Set(carteiras.map(c => c.prefixo).filter(Boolean))];
+  const prefixosDeRealizados = [...new Set(realizadosTipo.map(r => r.prefixo).filter(Boolean))];
+  const prefixosUnicos = [...new Set([...prefixosDeCarteiras, ...prefixosDeRealizados])].sort();
 
   const getRealizadoAcumulado = (prefixo, produto, ateDia) => {
     return realizadosTipo
