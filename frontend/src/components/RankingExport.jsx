@@ -1,0 +1,360 @@
+import React, { useState, useEffect } from 'react';
+import { useLocalStorage } from '../hooks/useLocalStorage';
+import { FileDown, Image, Layers, RefreshCw } from 'lucide-react';
+import { formatCurrency, formatPercentage } from '../utils/dataParser';
+import { 
+  calculateOrcadoPorAgencia, 
+  calculateRealizadoPorAgencia,
+  calculateRealizadoPorCarteira,
+  calculateAtingimento,
+  getAtingimentoColor,
+  getAtingimentoClass,
+  groupByRede,
+  sortByScoreMedio
+} from '../utils/calculations';
+import { exportToPNG, exportAllRedes, THEME_VARIANTS } from '../utils/exportUtils';
+import { toast } from 'sonner';
+
+const RankingExport = () => {
+  const [produtos] = useLocalStorage('challenge_produtos', []);
+  const [carteiras] = useLocalStorage('carteiras_master', []);
+  const [orcadosPorTipo] = useLocalStorage('orcados_por_tipo', []);
+  const [orcadosPorCarteira] = useLocalStorage('orcados_por_carteira', []);
+  const [redes] = useLocalStorage('redes', []);
+  const [realizadosTipo] = useLocalStorage('realizados_tipo', []);
+  const [realizadosCarteira] = useLocalStorage('realizados_carteira', []);
+  const [diasDesafio] = useLocalStorage('challenge_dias', 30);
+
+  const [unidade, setUnidade] = useState('agencia');
+  const [nomeDesafio, setNomeDesafio] = useState('');
+  const [temaIndex, setTemaIndex] = useState(0);
+  const [baseCalculo, setBaseCalculo] = useState('carteira');
+  const [rankingData, setRankingData] = useState([]);
+  const [diaFiltro, setDiaFiltro] = useState(null);
+
+  const hasCarteirasData = realizadosCarteira.length > 0;
+  const tema = THEME_VARIANTS[temaIndex];
+
+  const produtosRanking = [...produtos];
+  if (produtos.includes('Vida')) {
+    const vidaIndex = produtosRanking.indexOf('Vida');
+    produtosRanking[vidaIndex] = 'Vida Total';
+  }
+
+  const calculateRanking = () => {
+    if (unidade === 'agencia') {
+      const prefixosUnicos = [...new Set(carteiras.map(c => c.prefixo).filter(Boolean))];
+      
+      const rankings = prefixosUnicos.map(prefixo => {
+        const carteirasPrefixo = carteiras.filter(c => c.prefixo === prefixo);
+        const agencia = carteirasPrefixo[0]?.agencia || prefixo;
+        const redeInfo = redes.find(r => r.prefixo === prefixo);
+        const rede = redeInfo?.rede || 'Sem Rede';
+
+        const useCarteiraBase = baseCalculo === 'carteira' && orcadosPorCarteira.length > 0;
+        const orcado = calculateOrcadoPorAgencia(prefixo, carteiras, orcadosPorTipo, orcadosPorCarteira, useCarteiraBase);
+
+        const atingimentos = {};
+        const valores = {};
+
+        produtosRanking.forEach(produto => {
+          const realizado = calculateRealizadoPorAgencia(prefixo, produto, realizadosTipo, diaFiltro);
+          valores[produto] = realizado;
+          atingimentos[produto] = calculateAtingimento(realizado, orcado);
+        });
+
+        return {
+          prefixo,
+          agencia,
+          rede,
+          orcado,
+          valores,
+          atingimentos
+        };
+      });
+
+      return sortByScoreMedio(rankings);
+    } else {
+      const rankingsCarteira = [];
+
+      carteiras.forEach(c => {
+        const redeInfo = redes.find(r => r.prefixo === c.prefixo);
+        const rede = redeInfo?.rede || 'Sem Rede';
+
+        const orcadoCarteira = orcadosPorCarteira.find(o => 
+          o.prefixo === c.prefixo && o.carteira === c.carteira
+        );
+        const orcado = orcadoCarteira ? orcadoCarteira.valor * (orcadoCarteira.fatorMeta || 100) / 100 : 0;
+
+        const realizado = calculateRealizadoPorCarteira(c.prefixo, c.carteira, realizadosCarteira, diaFiltro);
+        const atingimento = calculateAtingimento(realizado, orcado);
+
+        rankingsCarteira.push({
+          prefixo: c.prefixo,
+          agencia: c.agencia,
+          carteira: c.carteira,
+          rede,
+          orcado,
+          valores: { Total: realizado },
+          atingimentos: { Total: atingimento }
+        });
+      });
+
+      return sortByScoreMedio(rankingsCarteira);
+    }
+  };
+
+  const handleAtualizarRanking = () => {
+    const data = calculateRanking();
+    setRankingData(data);
+    toast.success('Ranking atualizado!');
+  };
+
+  const handleExportPNGGeral = async () => {
+    await exportToPNG('ranking-export-all', `ranking-geral-${nomeDesafio || 'desafio'}.png`);
+    toast.success('Exportação concluída!');
+  };
+
+  const handleExportPNGRedes = async () => {
+    const redesUnicas = [...new Set(redes.map(r => r.rede).filter(Boolean))];
+    if (redesUnicas.length === 0) {
+      toast.error('Nenhuma rede configurada');
+      return;
+    }
+    await exportAllRedes(redesUnicas);
+    toast.success('Exportação de todas as redes concluída!');
+  };
+
+  useEffect(() => {
+    if (carteiras.length > 0) {
+      handleAtualizarRanking();
+    }
+  }, [unidade, baseCalculo, diaFiltro]);
+
+  const redesAgrupadas = groupByRede(rankingData, redes);
+  const redesUnicas = Object.keys(redesAgrupadas);
+
+  return (
+    <div>
+      <div className="bb-card">
+        <div className="bb-card-header">
+          <h2 className="bb-card-title" data-testid="ranking-export-title">Campo 8 — Ranking & Exportação</h2>
+          <p className="bb-card-subtitle">Configure, visualize e exporte o ranking do desafio</p>
+        </div>
+
+        {/* Configurações */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+          <div>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: 'var(--bb-gray-700)', fontSize: '14px' }}>
+              Unidade do Ranking:
+            </label>
+            <select
+              value={unidade}
+              onChange={(e) => setUnidade(e.target.value)}
+              className="bb-input"
+              data-testid="unidade-select"
+            >
+              <option value="agencia">Agência (Prefixo)</option>
+              <option value="carteiras" disabled={!hasCarteirasData}>
+                Carteiras {!hasCarteirasData ? '(sem dados)' : ''}
+              </option>
+            </select>
+          </div>
+
+          <div>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: 'var(--bb-gray-700)', fontSize: '14px' }}>
+              Nome do Desafio:
+            </label>
+            <input
+              type="text"
+              value={nomeDesafio}
+              onChange={(e) => setNomeDesafio(e.target.value)}
+              className="bb-input"
+              placeholder="Ex: Desafio Q1 2025"
+              data-testid="nome-desafio-input"
+            />
+          </div>
+
+          <div>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: 'var(--bb-gray-700)', fontSize: '14px' }}>
+              Tema Visual:
+            </label>
+            <select
+              value={temaIndex}
+              onChange={(e) => setTemaIndex(parseInt(e.target.value))}
+              className="bb-input"
+              data-testid="tema-select"
+            >
+              {THEME_VARIANTS.map((t, idx) => (
+                <option key={idx} value={idx}>{t.name}</option>
+              ))}
+            </select>
+          </div>
+
+          {unidade === 'agencia' && (
+            <div>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: 'var(--bb-gray-700)', fontSize: '14px' }}>
+                Base de Cálculo:
+              </label>
+              <select
+                value={baseCalculo}
+                onChange={(e) => setBaseCalculo(e.target.value)}
+                className="bb-input"
+                data-testid="base-calculo-select"
+              >
+                <option value="carteira">Por Carteira</option>
+                <option value="tipo">Por Tipo</option>
+              </select>
+            </div>
+          )}
+
+          <div>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: 'var(--bb-gray-700)', fontSize: '14px' }}>
+              Filtrar até o Dia:
+            </label>
+            <select
+              value={diaFiltro || ''}
+              onChange={(e) => setDiaFiltro(e.target.value ? parseInt(e.target.value) : null)}
+              className="bb-input"
+              data-testid="dia-filtro-select"
+            >
+              <option value="">Todos os dias</option>
+              {Array.from({ length: diasDesafio }, (_, i) => i + 1).map(dia => (
+                <option key={dia} value={dia}>Até Dia {dia}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Botões de Ação */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginBottom: '24px' }}>
+          <button
+            onClick={handleAtualizarRanking}
+            className="bb-btn bb-btn-primary"
+            data-testid="atualizar-ranking-btn"
+          >
+            <RefreshCw size={16} />
+            Atualizar Ranking
+          </button>
+          <button
+            onClick={handleExportPNGGeral}
+            className="bb-btn bb-btn-secondary"
+            disabled={rankingData.length === 0}
+            data-testid="export-png-geral-btn"
+          >
+            <Image size={16} />
+            Exportar PNG (Geral)
+          </button>
+          <button
+            onClick={handleExportPNGRedes}
+            className="bb-btn bb-btn-secondary"
+            disabled={redesUnicas.length === 0}
+            data-testid="export-png-redes-btn"
+          >
+            <Layers size={16} />
+            Exportar PNG (Todas as Redes)
+          </button>
+        </div>
+      </div>
+
+      {/* Área de Exportação */}
+      {rankingData.length > 0 && (
+        <div id="ranking-export-all" className="export-container" style={{ background: 'white', padding: '40px', borderRadius: '12px' }}>
+          {redesUnicas.map(rede => {
+            const dadosRede = redesAgrupadas[rede] || [];
+            if (dadosRede.length === 0) return null;
+
+            return (
+              <div key={rede} id={`ranking-rede-${rede.replace(/\s+/g, '-')}`} style={{ marginBottom: '48px', pageBreakAfter: 'always' }}>
+                {/* Cabeçalho */}
+                <div style={{ 
+                  background: tema.headerBg,
+                  color: tema.headerColor,
+                  padding: '24px',
+                  borderRadius: '12px 12px 0 0',
+                  marginBottom: '0'
+                }}>
+                  <h1 style={{ fontSize: '28px', fontWeight: '700', marginBottom: '8px', textAlign: 'center' }}>
+                    Ranking de Desafios de Seguridade — Banco do Brasil
+                  </h1>
+                  <p style={{ fontSize: '18px', fontWeight: '500', textAlign: 'center', color: tema.accentColor }}>
+                    Rede {rede} {nomeDesafio && `— ${nomeDesafio}`}
+                  </p>
+                </div>
+
+                {/* Tabela de Ranking */}
+                <div style={{ overflowX: 'auto', border: '2px solid #e8eef7', borderTop: 'none', borderRadius: '0 0 12px 12px' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', background: 'white' }}>
+                    <thead>
+                      <tr style={{ background: 'var(--bb-blue)', color: 'white' }}>
+                        <th style={{ padding: '12px', textAlign: 'left', fontSize: '14px', fontWeight: '600', position: 'sticky', top: 0, background: 'var(--bb-blue)' }}>Posição</th>
+                        <th style={{ padding: '12px', textAlign: 'left', fontSize: '14px', fontWeight: '600', position: 'sticky', top: 0, background: 'var(--bb-blue)' }}>Prefixo</th>
+                        <th style={{ padding: '12px', textAlign: 'left', fontSize: '14px', fontWeight: '600', position: 'sticky', top: 0, background: 'var(--bb-blue)' }}>Dependência</th>
+                        {unidade === 'carteiras' && (
+                          <th style={{ padding: '12px', textAlign: 'left', fontSize: '14px', fontWeight: '600', position: 'sticky', top: 0, background: 'var(--bb-blue)' }}>Carteira</th>
+                        )}
+                        <th style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: '600', position: 'sticky', top: 0, background: 'var(--bb-blue)' }}>Orçado (R$)</th>
+                        {(unidade === 'agencia' ? produtosRanking : ['Total']).map(produto => (
+                          <React.Fragment key={produto}>
+                            <th style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: '600', position: 'sticky', top: 0, background: 'var(--bb-blue)' }}>
+                              {produto}<br/>Valor (R$)
+                            </th>
+                            <th style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: '600', position: 'sticky', top: 0, background: 'var(--bb-blue)' }}>
+                              {produto}<br/>% Ating.
+                            </th>
+                          </React.Fragment>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {dadosRede.map((item, idx) => (
+                        <tr key={idx} style={{ borderBottom: '1px solid #e8eef7', background: idx % 2 === 0 ? 'white' : '#f8f9fc' }}>
+                          <td style={{ padding: '12px', fontSize: '14px', fontWeight: '600' }}>{idx + 1}º</td>
+                          <td style={{ padding: '12px', fontSize: '14px' }}>{item.prefixo}</td>
+                          <td style={{ padding: '12px', fontSize: '14px' }}>{item.agencia}</td>
+                          {unidade === 'carteiras' && (
+                            <td style={{ padding: '12px', fontSize: '14px' }}>{item.carteira}</td>
+                          )}
+                          <td style={{ padding: '12px', fontSize: '14px', textAlign: 'right', fontWeight: '600' }}>
+                            {formatCurrency(item.orcado)}
+                          </td>
+                          {(unidade === 'agencia' ? produtosRanking : ['Total']).map(produto => (
+                            <React.Fragment key={produto}>
+                              <td style={{ padding: '12px', fontSize: '14px', textAlign: 'right' }}>
+                                {formatCurrency(item.valores[produto] || 0)}
+                              </td>
+                              <td style={{ 
+                                padding: '12px', 
+                                fontSize: '14px', 
+                                textAlign: 'right',
+                                fontWeight: '600',
+                                color: getAtingimentoColor(item.atingimentos[produto] || 0)
+                              }}>
+                                {formatPercentage(item.atingimentos[produto] || 0)}
+                              </td>
+                            </React.Fragment>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {rankingData.length === 0 && (
+        <div className="bb-card">
+          <div style={{ padding: '32px', textAlign: 'center', color: 'var(--bb-gray-600)' }}>
+            <FileDown size={48} style={{ margin: '0 auto 16px', opacity: 0.5 }} />
+            <p style={{ fontSize: '16px' }}>Clique em "Atualizar Ranking" para gerar os dados</p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default RankingExport;
