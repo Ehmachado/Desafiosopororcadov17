@@ -63,6 +63,14 @@ const ControleDiario = () => {
       .reduce((sum, r) => sum + r.valor, 0);
   };
 
+  // Busca o valor realizado do Campo 5 (sem dia especificado) para preencher automaticamente
+  const getValorDoCampo5 = (prefixo, produto) => {
+    const realizadoSemDia = realizadosTipo.find(
+      r => r.prefixo === prefixo && r.produto === produto && !r.dia
+    );
+    return realizadoSemDia ? realizadoSemDia.valor : '';
+  };
+
   return (
     <div className="bb-card">
       <div className="bb-card-header">
