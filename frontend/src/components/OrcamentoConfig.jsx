@@ -22,39 +22,14 @@ const OrcamentoConfig = () => {
 
   const tiposCarteira = [...new Set(carteiras.map(c => c.tipoCarteira).filter(Boolean))];
 
-  // Carregar valores salvos apenas na inicialização
   useEffect(() => {
-    const updated = {};
-    
-    // Carrega valores existentes de orcadosPorTipo
+    const existing = {};
     orcadosPorTipo.forEach(o => {
       const key = `${o.produto}-${o.tipoCarteira}`;
-      updated[key] = o.valor;
+      existing[key] = o.valor;
     });
-    
-    setTipoOrcamentos(updated);
+    setTipoOrcamentos(existing);
   }, []);
-
-  // Adicionar chaves para novos produtos quando produtos ou tipos mudarem
-  useEffect(() => {
-    if (produtos.length > 0 && tiposCarteira.length > 0) {
-      setTipoOrcamentos(prev => {
-        const updated = { ...prev };
-        
-        // Garante que TODOS os produtos têm chaves
-        produtos.forEach(produto => {
-          tiposCarteira.forEach(tipo => {
-            const key = `${produto}-${tipo}`;
-            if (!(key in updated)) {
-              updated[key] = 0;
-            }
-          });
-        });
-        
-        return updated;
-      });
-    }
-  }, [produtos, tiposCarteira]);
 
   useEffect(() => {
     if (inputTextCarteira.trim()) {
@@ -185,104 +160,6 @@ const OrcamentoConfig = () => {
               <Save size={16} />
               Salvar Orçamentos por Tipo
             </button>
-
-            {/* Tabela de Orçamentos Salvos */}
-            {orcadosPorTipo.length > 0 && (
-              <div style={{ marginTop: '32px' }}>
-                <div style={{
-                  background: 'linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%)',
-                  padding: '20px',
-                  borderRadius: '12px',
-                  border: '2px solid #4caf50',
-                  marginBottom: '16px'
-                }}>
-                  <h3 style={{ 
-                    fontSize: '18px', 
-                    fontWeight: 700, 
-                    color: '#2e7d32', 
-                    marginBottom: '8px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px'
-                  }}>
-                    <DollarSign size={20} />
-                    Orçamentos Salvos por Tipo e Produto
-                  </h3>
-                  <p style={{ fontSize: '14px', color: '#1b5e20' }}>
-                    Total de {orcadosPorTipo.length} orçamentos configurados
-                  </p>
-                </div>
-
-                <div style={{ overflowX: 'auto' }}>
-                  <table className="bb-table">
-                    <thead>
-                      <tr>
-                        <th>Produto</th>
-                        <th>Tipo de Carteira</th>
-                        <th style={{ textAlign: 'right' }}>Orçado (R$)</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {orcadosPorTipo
-                        .sort((a, b) => a.produto.localeCompare(b.produto))
-                        .map((item, index) => (
-                          <tr key={index}>
-                            <td>
-                              <span className="bb-badge bb-badge-primary">
-                                {item.produto}
-                              </span>
-                            </td>
-                            <td>{item.tipoCarteira}</td>
-                            <td style={{ textAlign: 'right', fontWeight: 600, color: 'var(--bb-blue)' }}>
-                              {formatCurrency(item.valor)}
-                            </td>
-                          </tr>
-                        ))}
-                    </tbody>
-                    <tfoot>
-                      <tr style={{ background: '#f5f5f5', fontWeight: 700 }}>
-                        <td colSpan="2" style={{ textAlign: 'right', paddingRight: '16px' }}>
-                          Total Geral:
-                        </td>
-                        <td style={{ textAlign: 'right', color: 'var(--bb-blue)', fontSize: '16px' }}>
-                          {formatCurrency(orcadosPorTipo.reduce((sum, o) => sum + (parseFloat(o.valor) || 0), 0))}
-                        </td>
-                      </tr>
-                    </tfoot>
-                  </table>
-                </div>
-
-                {/* Resumo por Produto */}
-                <div style={{ marginTop: '24px' }}>
-                  <h4 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--bb-gray-700)', marginBottom: '12px' }}>
-                    Resumo por Produto:
-                  </h4>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
-                    {produtos.map(produto => {
-                      const totalProduto = orcadosPorTipo
-                        .filter(o => o.produto === produto)
-                        .reduce((sum, o) => sum + (parseFloat(o.valor) || 0), 0);
-                      
-                      if (totalProduto === 0) return null;
-                      
-                      return (
-                        <div key={produto} style={{
-                          padding: '12px 16px',
-                          background: '#f0f4f8',
-                          borderRadius: '8px',
-                          border: '2px solid #e0e0e0'
-                        }}>
-                          <div style={{ fontSize: '12px', color: '#666' }}>{produto}</div>
-                          <div style={{ fontSize: '18px', fontWeight: 700, color: 'var(--bb-blue)' }}>
-                            {formatCurrency(totalProduto)}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         )}
       </div>
