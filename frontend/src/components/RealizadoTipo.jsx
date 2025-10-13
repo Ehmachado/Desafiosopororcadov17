@@ -243,15 +243,30 @@ const RealizadoTipo = () => {
                 />
               )}
 
-              <button
-                onClick={handleSave}
-                className="bb-btn bb-btn-primary"
-                disabled={previewData.length === 0}
-                data-testid="save-realizado-tipo-btn"
-              >
-                <Save size={16} />
-                Salvar Realizado de {currentProduto} ({previewData.length})
-              </button>
+              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                <button
+                  onClick={handleSaveDiario}
+                  className="bb-btn bb-btn-primary"
+                  disabled={previewData.length === 0}
+                  data-testid="save-realizado-diario-btn"
+                >
+                  <Save size={16} />
+                  Salvar Dia {selectedDay} - {currentProduto} ({previewData.length})
+                </button>
+                <button
+                  onClick={handleClearDiario}
+                  className="bb-btn"
+                  style={{ 
+                    background: '#dc3545', 
+                    color: 'white',
+                    border: 'none'
+                  }}
+                  data-testid="clear-realizado-diario-btn"
+                >
+                  <Trash2 size={16} />
+                  Limpar Dia {selectedDay} - {currentProduto}
+                </button>
+              </div>
             </div>
           )}
         </div>
