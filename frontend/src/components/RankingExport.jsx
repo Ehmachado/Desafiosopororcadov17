@@ -94,21 +94,22 @@ const RankingExport = () => {
         const valores = {};
 
         produtosRanking.forEach(produto => {
-          // Usa realizadosDiarios se houver dados, senão usa realizadosTipo
+          // Usa realizadosDiariosTipo se houver dados, senão usa realizadosTipo
           let realizado = 0;
-          if (realizadosDiarios.length > 0) {
-            // Soma todos os dias salvos para este prefixo e produto
-            realizado = realizadosDiarios
-              .filter(r => r.tipo === 'tipo' && r.prefixo === prefixo && r.produto === produto)
+          if (realizadosDiariosTipo.length > 0) {
+            // Soma todos os dias salvos até diaFiltro para este prefixo e produto
+            const diaLimite = diaFiltro || diasDesafio;
+            realizado = realizadosDiariosTipo
+              .filter(r => r.prefixo === prefixo && r.produto === produto && r.dia <= diaLimite)
               .reduce((sum, r) => sum + (parseFloat(r.valor) || 0), 0);
             
             // Se for Vida Total, soma Vida + Vidinha
             if (produto === 'Vida Total') {
-              const vida = realizadosDiarios
-                .filter(r => r.tipo === 'tipo' && r.prefixo === prefixo && r.produto === 'Vida')
+              const vida = realizadosDiariosTipo
+                .filter(r => r.prefixo === prefixo && r.produto === 'Vida' && r.dia <= diaLimite)
                 .reduce((sum, r) => sum + (parseFloat(r.valor) || 0), 0);
-              const vidinha = realizadosDiarios
-                .filter(r => r.tipo === 'tipo' && r.prefixo === prefixo && r.produto === 'Vidinha')
+              const vidinha = realizadosDiariosTipo
+                .filter(r => r.prefixo === prefixo && r.produto === 'Vidinha' && r.dia <= diaLimite)
                 .reduce((sum, r) => sum + (parseFloat(r.valor) || 0), 0);
               realizado = vida + vidinha;
             }
