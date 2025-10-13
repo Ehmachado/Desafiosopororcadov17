@@ -371,16 +371,30 @@ const RankingExport = () => {
                           <th style={{ padding, textAlign: 'left', fontSize, fontWeight: '600', position: 'sticky', top: 0, background: 'var(--bb-blue)', whiteSpace: 'nowrap' }}>Carteira</th>
                         )}
                         <th style={{ padding, textAlign: 'right', fontSize, fontWeight: '600', position: 'sticky', top: 0, background: 'var(--bb-blue)', whiteSpace: 'nowrap' }}>Orçado</th>
-                        {(unidade === 'agencia' ? produtosRanking : ['Total']).map(produto => (
-                          <React.Fragment key={produto}>
-                            <th style={{ padding, textAlign: 'right', fontSize, fontWeight: '600', position: 'sticky', top: 0, background: 'var(--bb-blue)', whiteSpace: 'nowrap' }}>
-                              {produto}<br/>Valor
-                            </th>
-                            <th style={{ padding, textAlign: 'right', fontSize, fontWeight: '600', position: 'sticky', top: 0, background: 'var(--bb-blue)', whiteSpace: 'nowrap' }}>
-                              {produto}<br/>%
-                            </th>
-                          </React.Fragment>
-                        ))}
+                        {(unidade === 'agencia' ? produtosRanking : ['Total']).map((produto, pIdx) => {
+                          // Cores mais escuras para os cabeçalhos dos produtos
+                          const headerCores = [
+                            '#1976d2', // Azul
+                            '#f57c00', // Laranja
+                            '#388e3c', // Verde
+                            '#7b1fa2', // Roxo
+                            '#fbc02d', // Amarelo
+                            '#c2185b', // Rosa
+                            '#00796b', // Ciano
+                          ];
+                          const headerBg = headerCores[pIdx % headerCores.length];
+                          
+                          return (
+                            <React.Fragment key={produto}>
+                              <th style={{ padding, textAlign: 'right', fontSize, fontWeight: '600', position: 'sticky', top: 0, background: headerBg, whiteSpace: 'nowrap' }}>
+                                {produto}<br/>Valor
+                              </th>
+                              <th style={{ padding, textAlign: 'right', fontSize, fontWeight: '600', position: 'sticky', top: 0, background: headerBg, whiteSpace: 'nowrap' }}>
+                                {produto}<br/>%
+                              </th>
+                            </React.Fragment>
+                          );
+                        })}
                       </tr>
                     </thead>
                     <tbody>
