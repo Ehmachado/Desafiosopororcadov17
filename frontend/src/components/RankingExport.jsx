@@ -384,35 +384,63 @@ const RankingExport = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {dadosRede.map((item, idx) => (
-                        <tr key={idx} style={{ borderBottom: '1px solid #e8eef7', background: idx % 2 === 0 ? 'white' : '#f8f9fc' }}>
-                          <td style={{ padding, fontSize, fontWeight: '600' }}>{idx + 1}º</td>
-                          <td style={{ padding, fontSize }}>{item.prefixo}</td>
-                          <td style={{ padding, fontSize }}>{item.agencia}</td>
-                          {unidade === 'carteiras' && (
-                            <td style={{ padding, fontSize }}>{item.carteira}</td>
-                          )}
-                          <td style={{ padding, fontSize, textAlign: 'right', fontWeight: '600' }}>
-                            {formatCurrency(item.orcado)}
-                          </td>
-                          {(unidade === 'agencia' ? produtosRanking : ['Total']).map(produto => (
-                            <React.Fragment key={produto}>
-                              <td style={{ padding, fontSize, textAlign: 'right' }}>
-                                {formatCurrency(item.valores[produto] || 0)}
-                              </td>
-                              <td style={{ 
-                                padding, 
-                                fontSize, 
-                                textAlign: 'right',
-                                fontWeight: '600',
-                                color: getAtingimentoColor(item.atingimentos[produto] || 0)
-                              }}>
-                                {formatPercentage(item.atingimentos[produto] || 0)}
-                              </td>
-                            </React.Fragment>
-                          ))}
-                        </tr>
-                      ))}
+                      {dadosRede.map((item, idx) => {
+                        // Cores alternadas mais visíveis para as linhas
+                        const rowBgColor = idx % 2 === 0 ? '#ffffff' : '#f0f4f8';
+                        
+                        // Array de cores suaves para cada produto
+                        const produtoCores = [
+                          { bg: '#e3f2fd', bgAlt: '#d1e7f7' }, // Azul claro
+                          { bg: '#fff3e0', bgAlt: '#ffe4c4' }, // Laranja claro
+                          { bg: '#e8f5e9', bgAlt: '#d4ead5' }, // Verde claro
+                          { bg: '#f3e5f5', bgAlt: '#e1d4e3' }, // Roxo claro
+                          { bg: '#fff9c4', bgAlt: '#ffeb99' }, // Amarelo claro
+                          { bg: '#fce4ec', bgAlt: '#f8d0dd' }, // Rosa claro
+                          { bg: '#e0f2f1', bgAlt: '#c8e6e4' }, // Ciano claro
+                        ];
+                        
+                        return (
+                          <tr key={idx} style={{ borderBottom: '1px solid #e8eef7', background: rowBgColor }}>
+                            <td style={{ padding, fontSize, fontWeight: '600', background: rowBgColor }}>{idx + 1}º</td>
+                            <td style={{ padding, fontSize, background: rowBgColor }}>{item.prefixo}</td>
+                            <td style={{ padding, fontSize, background: rowBgColor }}>{item.agencia}</td>
+                            {unidade === 'carteiras' && (
+                              <td style={{ padding, fontSize, background: rowBgColor }}>{item.carteira}</td>
+                            )}
+                            <td style={{ padding, fontSize, textAlign: 'right', fontWeight: '600', background: rowBgColor }}>
+                              {formatCurrency(item.orcado)}
+                            </td>
+                            {(unidade === 'agencia' ? produtosRanking : ['Total']).map((produto, pIdx) => {
+                              // Usa uma cor diferente para cada produto, com variação para linhas alternadas
+                              const corProduto = produtoCores[pIdx % produtoCores.length];
+                              const bgProduto = idx % 2 === 0 ? corProduto.bg : corProduto.bgAlt;
+                              
+                              return (
+                                <React.Fragment key={produto}>
+                                  <td style={{ 
+                                    padding, 
+                                    fontSize, 
+                                    textAlign: 'right',
+                                    background: bgProduto
+                                  }}>
+                                    {formatCurrency(item.valores[produto] || 0)}
+                                  </td>
+                                  <td style={{ 
+                                    padding, 
+                                    fontSize, 
+                                    textAlign: 'right',
+                                    fontWeight: '600',
+                                    color: getAtingimentoColor(item.atingimentos[produto] || 0),
+                                    background: bgProduto
+                                  }}>
+                                    {formatPercentage(item.atingimentos[produto] || 0)}
+                                  </td>
+                                </React.Fragment>
+                              );
+                            })}
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
