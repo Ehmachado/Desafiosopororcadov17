@@ -113,10 +113,6 @@ const Dashboard = () => {
             <RealizadoCarteira />
           </TabsContent>
 
-          <TabsContent value="controle-diario" className="fade-in">
-            <ControleDiario />
-          </TabsContent>
-
           <TabsContent value="ranking" className="fade-in">
             <RankingExport />
           </TabsContent>
