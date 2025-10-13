@@ -422,6 +422,23 @@ const RankingExport = () => {
                   borderRadius: '12px 12px 0 0',
                   marginBottom: '0'
                 }}>
+                  {/* Super Regional */}
+                  {(nomeSuper || simboloSuper) && (
+                    <div style={{ marginBottom: '20px', textAlign: 'center', borderBottom: '2px solid rgba(255,255,255,0.3)', paddingBottom: '16px' }}>
+                      {simboloSuper && (
+                        <div style={{ fontSize: '20px', fontWeight: '700', marginBottom: '4px', letterSpacing: '2px' }}>
+                          {simboloSuper}
+                        </div>
+                      )}
+                      {nomeSuper && (
+                        <div style={{ fontSize: '16px', fontWeight: '600', opacity: 0.95 }}>
+                          {nomeSuper}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  
+                  {/* Título do Desafio */}
                   <h1 style={{ fontSize: headerFontSize, fontWeight: '700', marginBottom: '12px', textAlign: 'center', lineHeight: '1.2' }}>
                     {nomeDesafio || 'Ranking de Desafios de Seguridade'}
                   </h1>
