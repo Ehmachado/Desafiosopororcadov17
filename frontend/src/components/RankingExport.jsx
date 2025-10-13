@@ -45,7 +45,7 @@ const RankingExport = () => {
 
   // Calcula tamanhos dinâmicos baseado no número de produtos
   const numProdutos = unidade === 'agencia' ? produtosRanking.length : 1;
-  const numColunas = 4 + (numProdutos * 2); // Posição, Prefixo, Dependência, Orçado + (Valor + % para cada produto)
+  const numColunas = 3 + (numProdutos * 3); // Posição, Prefixo, Dependência + (Orçado + Realizado + % para cada produto)
   
   // Ajusta tamanho de fonte e padding baseado no número de produtos
   const getFontSize = () => {
