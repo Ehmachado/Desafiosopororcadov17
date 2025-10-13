@@ -56,7 +56,7 @@ const OrcamentoConfig = () => {
         return updated;
       });
     }
-  }, [produtos, tiposCarteira, carteiras, setTipoOrcamentos]);
+  }, [produtos, tiposCarteira, carteiras]);
 
   useEffect(() => {
     if (inputTextCarteira.trim()) {
