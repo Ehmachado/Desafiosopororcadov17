@@ -60,7 +60,7 @@ const ControleDiario = () => {
   });
 
   // Popula automaticamente os valores do Campo 5 quando o componente carrega ou muda de dia
-  React.useEffect(() => {
+  useEffect(() => {
     if (!valoresInicializados && prefixosUnicos.length > 0 && produtosComVidinha.length > 0) {
       const valoresIniciais = {};
       
@@ -81,7 +81,7 @@ const ControleDiario = () => {
   }, [prefixosUnicos, produtosComVidinha, valoresInicializados]);
 
   // Reinicializa quando muda o dia
-  React.useEffect(() => {
+  useEffect(() => {
     setValoresInicializados(false);
   }, [diaAtual]);
 
