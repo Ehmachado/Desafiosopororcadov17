@@ -477,6 +477,26 @@ const RankingExport = () => {
           </div>
         </div>
 
+        {/* Última Atualização */}
+        {ultimaAtualizacao && (
+          <div style={{ 
+            padding: '12px 16px', 
+            background: '#e8f4f8', 
+            borderRadius: '8px', 
+            marginBottom: '16px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            fontSize: '14px',
+            color: '#2c5282'
+          }}>
+            <span style={{ fontWeight: 600 }}>Última atualização:</span>
+            <span>
+              {ultimaAtualizacao.toLocaleDateString('pt-BR')} às {ultimaAtualizacao.toLocaleTimeString('pt-BR')}
+            </span>
+          </div>
+        )}
+
         {/* Botões de Ação */}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginBottom: '24px' }}>
           <button
@@ -504,6 +524,16 @@ const RankingExport = () => {
           >
             <Layers size={16} />
             Exportar PNG (Todas as Redes)
+          </button>
+          <button
+            onClick={handleExportSimplificado}
+            className="bb-btn bb-btn-secondary"
+            disabled={rankingData.length === 0}
+            data-testid="export-simplificado-btn"
+            title="Exportar apenas Prefixo, Agência, Orçados, Realizados e % Atingimento"
+          >
+            <FileDown size={16} />
+            Exportar Simplificado (CSV)
           </button>
         </div>
       </div>
