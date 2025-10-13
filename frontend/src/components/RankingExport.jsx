@@ -343,23 +343,23 @@ const RankingExport = () => {
                     <tbody>
                       {dadosRede.map((item, idx) => (
                         <tr key={idx} style={{ borderBottom: '1px solid #e8eef7', background: idx % 2 === 0 ? 'white' : '#f8f9fc' }}>
-                          <td style={{ padding: '12px', fontSize: '14px', fontWeight: '600' }}>{idx + 1}º</td>
-                          <td style={{ padding: '12px', fontSize: '14px' }}>{item.prefixo}</td>
-                          <td style={{ padding: '12px', fontSize: '14px' }}>{item.agencia}</td>
+                          <td style={{ padding, fontSize, fontWeight: '600' }}>{idx + 1}º</td>
+                          <td style={{ padding, fontSize }}>{item.prefixo}</td>
+                          <td style={{ padding, fontSize }}>{item.agencia}</td>
                           {unidade === 'carteiras' && (
-                            <td style={{ padding: '12px', fontSize: '14px' }}>{item.carteira}</td>
+                            <td style={{ padding, fontSize }}>{item.carteira}</td>
                           )}
-                          <td style={{ padding: '12px', fontSize: '14px', textAlign: 'right', fontWeight: '600' }}>
+                          <td style={{ padding, fontSize, textAlign: 'right', fontWeight: '600' }}>
                             {formatCurrency(item.orcado)}
                           </td>
                           {(unidade === 'agencia' ? produtosRanking : ['Total']).map(produto => (
                             <React.Fragment key={produto}>
-                              <td style={{ padding: '12px', fontSize: '14px', textAlign: 'right' }}>
+                              <td style={{ padding, fontSize, textAlign: 'right' }}>
                                 {formatCurrency(item.valores[produto] || 0)}
                               </td>
                               <td style={{ 
-                                padding: '12px', 
-                                fontSize: '14px', 
+                                padding, 
+                                fontSize, 
                                 textAlign: 'right',
                                 fontWeight: '600',
                                 color: getAtingimentoColor(item.atingimentos[produto] || 0)
