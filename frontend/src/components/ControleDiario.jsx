@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
-import { Calendar, Save } from 'lucide-react';
-import { formatCurrency } from '../utils/dataParser';
+import { Save, Trash2, Copy } from 'lucide-react';
+import { formatCurrency, parseNumericValue } from '../utils/dataParser';
 import { toast } from 'sonner';
 
 const ControleDiario = () => {
-  const [diasDesafio] = useLocalStorage('challenge_dias', 30);
   const [produtos] = useLocalStorage('challenge_produtos', []);
-  const [carteiras] = useLocalStorage('carteiras_master', []);
   const [realizadosTipo, setRealizadosTipo] = useLocalStorage('realizados_tipo', []);
-  const [diaAtual, setDiaAtual] = useState(1);
-  const [valoresDia, setValoresDia] = useState({});
-  const [valoresInicializados, setValoresInicializados] = useState(false);
+  const [realizadosCarteira, setRealizadosCarteira] = useLocalStorage('realizados_carteira', []);
+  
+  // Estados para edição
+  const [dadosTipoEditados, setDadosTipoEditados] = useState([]);
+  const [dadosCarteiraEditados, setDadosCarteiraEditados] = useState([]);
 
   const produtosComVidinha = [...produtos];
   if (produtos.includes('Vida') && !produtosComVidinha.includes('Vidinha')) {
@@ -19,91 +19,19 @@ const ControleDiario = () => {
     produtosComVidinha.splice(vidaIndex + 1, 0, 'Vidinha');
   }
 
-  const handleSaveDia = () => {
-    const novosRealizados = [];
-    Object.entries(valoresDia).forEach(([key, valor]) => {
-      const [prefixo, produto] = key.split('-');
-      if (valor > 0) {
-        novosRealizados.push({
-          prefixo,
-          produto,
-          valor: parseFloat(valor),
-          dia: diaAtual
-        });
-      }
-    });
-
-    if (novosRealizados.length === 0) {
-      toast.error('Nenhum valor informado');
-      return;
-    }
-
-    const filteredRealizados = realizadosTipo.filter(r => r.dia !== diaAtual);
-    setRealizadosTipo([...filteredRealizados, ...novosRealizados]);
-    setValoresDia({});
-    toast.success(`Dados do dia ${diaAtual} salvos!`);
-  };
-
-  // Pegar prefixos únicos das carteiras OU dos dados já salvos no Campo 5
-  const prefixosDeCarteiras = [...new Set(carteiras.map(c => c.prefixo).filter(Boolean))];
-  const prefixosDeRealizados = [...new Set(realizadosTipo.map(r => r.prefixo).filter(Boolean))];
-  const prefixosUnicos = [...new Set([...prefixosDeCarteiras, ...prefixosDeRealizados])].sort();
-  
-  // Debug info
-  console.log('Campo 7 Debug:', {
-    carteiras: carteiras.length,
-    realizadosTipo: realizadosTipo.length,
-    prefixosDeCarteiras,
-    prefixosDeRealizados,
-    prefixosUnicos,
-    realizadosTipo: realizadosTipo
-  });
-
-  // Popula automaticamente os valores do Campo 5 quando o componente carrega ou muda de dia
+  // Carrega dados do Campo 5 quando monta o componente
   useEffect(() => {
-    if (!valoresInicializados && prefixosUnicos.length > 0 && produtosComVidinha.length > 0) {
-      const valoresIniciais = {};
-      
-      prefixosUnicos.forEach(prefixo => {
-        produtosComVidinha.forEach(produto => {
-          const valorCampo5 = getValorDoCampo5(prefixo, produto);
-          if (valorCampo5) {
-            const key = `${prefixo}-${produto}`;
-            valoresIniciais[key] = valorCampo5;
-          }
-        });
-      });
-      
-      console.log('Valores inicializados do Campo 5:', valoresIniciais);
-      setValoresDia(valoresIniciais);
-      setValoresInicializados(true);
+    if (realizadosTipo.length > 0) {
+      setDadosTipoEditados([...realizadosTipo]);
     }
-  }, [prefixosUnicos, produtosComVidinha, valoresInicializados]);
+  }, []);
 
-  // Reinicializa quando muda o dia
+  // Carrega dados do Campo 6 quando monta o componente
   useEffect(() => {
-    setValoresInicializados(false);
-  }, [diaAtual]);
-
-  const getRealizadoAcumulado = (prefixo, produto, ateDia) => {
-    return realizadosTipo
-      .filter(r => r.prefixo === prefixo && r.produto === produto && (!r.dia || r.dia <= ateDia))
-      .reduce((sum, r) => sum + r.valor, 0);
-  };
-
-  // Busca o valor realizado do Campo 5 (sem dia especificado) para preencher automaticamente
-  const getValorDoCampo5 = (prefixo, produto) => {
-    // Busca realizados sem dia (vindos do Campo 5)
-    const realizados = realizadosTipo.filter(
-      r => r.prefixo === prefixo && r.produto === produto && !r.dia
-    );
-    
-    if (realizados.length === 0) return '';
-    
-    // Se houver múltiplos, retorna a soma (caso tenha sido salvo várias vezes)
-    const total = realizados.reduce((sum, r) => sum + (parseFloat(r.valor) || 0), 0);
-    return total;
-  };
+    if (realizadosCarteira.length > 0) {
+      setDadosCarteiraEditados([...realizadosCarteira]);
+    }
+  }, []);
 
   return (
     <div className="bb-card">
