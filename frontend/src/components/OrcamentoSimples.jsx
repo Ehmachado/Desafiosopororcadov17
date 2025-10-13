@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
-import { Save, Trash2, DollarSign, Building2 } from 'lucide-react';
+import { Save, Trash2, DollarSign } from 'lucide-react';
 import { formatCurrency, parseNumericValue } from '../utils/dataParser';
 import { toast } from 'sonner';
 
@@ -57,8 +57,7 @@ const OrcamentoSimples = () => {
         orcamentosAgencia[prefixo] = {
           prefixo,
           agencia: carteira.agencia,
-          total: 0,
-          detalhes: []
+          total: 0
         };
       }
       
@@ -67,14 +66,6 @@ const OrcamentoSimples = () => {
         const key = `${tipo}-${produto}`;
         const orcamento = orcamentoPorTipo[key] || 0;
         orcamentosAgencia[prefixo].total += orcamento;
-        
-        if (orcamento > 0) {
-          orcamentosAgencia[prefixo].detalhes.push({
-            tipo,
-            produto,
-            orcamento
-          });
-        }
       });
     });
     
@@ -86,50 +77,6 @@ const OrcamentoSimples = () => {
     setInputValues(prev => ({
       ...prev,
       [key]: parseNumericValue(valor)
-    }));
-  };
-
-  const handleSalvar = () => {
-    setOrcamentoPorTipo(inputValues);
-    toast.success('Orçamentos salvos com sucesso!');
-  };
-
-  const handleLimpar = () => {
-    if (window.confirm('Tem certeza que deseja limpar todos os dados de orçamento?')) {
-      setInputValues({});
-      setOrcamentoPorTipo({});
-      toast.success('Dados limpos com sucesso!');
-    }
-  };
-
-  const potenciais = calcularPotencialPorTipo();
-  const orcamentosAgencia = calcularOrcamentoPorAgencia();
-  const potencialTotal = Object.values(potenciais).reduce((sum, p) => sum + p.potencial, 0);
-      
-      if (!orcamentosAgencia[prefixo]) {
-        orcamentosAgencia[prefixo] = {
-          prefixo,
-          agencia: carteira.agencia,
-          total: 0,
-          carteiras: []
-        };
-      }
-      
-      orcamentosAgencia[prefixo].total += orcamento;
-      orcamentosAgencia[prefixo].carteiras.push({
-        carteira: carteira.carteira,
-        tipo: tipo,
-        orcamento: orcamento
-      });
-    });
-    
-    return Object.values(orcamentosAgencia).sort((a, b) => a.prefixo.localeCompare(b.prefixo));
-  };
-
-  const handleInputChange = (tipo, valor) => {
-    setInputValues(prev => ({
-      ...prev,
-      [tipo]: parseNumericValue(valor)
     }));
   };
 
