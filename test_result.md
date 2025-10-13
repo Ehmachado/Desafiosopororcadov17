@@ -101,3 +101,133 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: |
+  Remover Campo 7 (Controle Diário) e integrar funcionalidade diária nos Campos 5 e 6.
+  - Campo 5: Adicionar controle diário para realizado por tipo de seguro
+  - Campo 6: Adicionar controle diário para realizado por carteira
+  - Dados diários devem ser salvos separadamente com acumulado total
+  - Acumulado total deve ser usado no Campo 8 (Ranking)
+
+backend:
+  - task: "N/A - Only frontend changes"
+    implemented: true
+    working: "NA"
+    file: "N/A"
+    stuck_count: 0
+    priority: "low"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "No backend changes required for this feature"
+
+frontend:
+  - task: "Remove Campo 7 (ControleDiario) from Dashboard"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/Dashboard.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Successfully removed Campo 7 tab and component from Dashboard. Tab no longer appears in navigation."
+
+  - task: "Add daily control to Campo 5 (RealizadoTipo)"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/RealizadoTipo.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: |
+          Successfully integrated daily control into Campo 5:
+          - Added day selector (1 to diasDesafio)
+          - Added realizadosDiarios localStorage state
+          - Added handleSaveDiario() and handleClearDiario() functions
+          - Added realizadoAcumulado calculation (sum of all days <= selectedDay)
+          - Added UI showing accumulated totals
+          - Data structure: { prefixo, produto, valor, dia }
+
+  - task: "Add daily control to Campo 6 (RealizadoCarteira)"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/RealizadoCarteira.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: |
+          Successfully integrated daily control into Campo 6:
+          - Added day selector (1 to diasDesafio)
+          - Added realizadosDiarios localStorage state
+          - Added handleSaveDiario() and handleClearDiario() functions
+          - Added realizadoAcumulado calculation (sum of all days <= selectedDay)
+          - Added UI showing accumulated totals
+          - Data structure: { prefixo, carteira, tipoCarteira, valor, dia }
+
+  - task: "Update Campo 8 (RankingExport) to use daily accumulated data"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/RankingExport.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: |
+          Successfully updated RankingExport to use new daily data:
+          - Changed localStorage keys from 'realizados_diarios' to 'realizados_tipo_diarios' and 'realizados_carteira_diarios'
+          - Updated calculation logic to sum all days <= diaFiltro
+          - Ranking now correctly uses accumulated totals from Campos 5 and 6
+
+metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: true
+
+test_plan:
+  current_focus:
+    - "Remove Campo 7 from Dashboard"
+    - "Daily control integration in Campo 5"
+    - "Daily control integration in Campo 6"
+    - "Ranking calculation with accumulated data"
+  stuck_tasks: []
+  test_all: true
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: |
+      Implementation completed successfully:
+      
+      ✅ Phase 1: Campo 7 removed from Dashboard
+      - Removed import and tab references
+      - Tab "Controle Diário" no longer appears
+      
+      ✅ Phase 2: Campo 5 enhanced with daily control
+      - Day selector added (Dia 1 to diasDesafio)
+      - Daily data saved separately: realizados_tipo_diarios
+      - Accumulated total calculated and displayed
+      - UI shows "Realizado Total Acumulado até Dia X"
+      
+      ✅ Phase 3: Campo 6 enhanced with daily control
+      - Day selector added (Dia 1 to diasDesafio)
+      - Daily data saved separately: realizados_carteira_diarios
+      - Accumulated total calculated and displayed
+      - UI shows "Realizado Total Acumulado até Dia X"
+      
+      ✅ Phase 4: Campo 8 updated to use accumulated data
+      - Uses realizados_tipo_diarios and realizados_carteira_diarios
+      - Calculates ranking based on accumulated totals up to diaFiltro
+      
+      All UI tests passed successfully. Application is ready for user testing.
