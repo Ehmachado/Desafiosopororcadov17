@@ -484,16 +484,36 @@ const RankingExport = () => {
                   borderRadius: '12px 12px 0 0',
                   marginBottom: '0'
                 }}>
-                  {/* Super Regional */}
+                  {/* Super Regional com Logo */}
                   {(nomeSuper || simboloSuper) && (
-                    <div style={{ marginBottom: '20px', textAlign: 'center', borderBottom: '2px solid rgba(255,255,255,0.3)', paddingBottom: '16px' }}>
+                    <div style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center',
+                      gap: '20px',
+                      marginBottom: '20px', 
+                      borderBottom: '2px solid rgba(255,255,255,0.3)', 
+                      paddingBottom: '16px' 
+                    }}>
                       {simboloSuper && (
-                        <div style={{ fontSize: '20px', fontWeight: '700', marginBottom: '4px', letterSpacing: '2px' }}>
-                          {simboloSuper}
-                        </div>
+                        <img 
+                          src={simboloSuper} 
+                          alt="Logo Super Regional"
+                          style={{ 
+                            height: '60px', 
+                            width: 'auto',
+                            maxWidth: '120px',
+                            objectFit: 'contain'
+                          }}
+                        />
                       )}
                       {nomeSuper && (
-                        <div style={{ fontSize: '16px', fontWeight: '600', opacity: 0.95 }}>
+                        <div style={{ 
+                          fontSize: headerFontSize, 
+                          fontWeight: '700', 
+                          textAlign: simboloSuper ? 'left' : 'center',
+                          lineHeight: '1.2'
+                        }}>
                           {nomeSuper}
                         </div>
                       )}
