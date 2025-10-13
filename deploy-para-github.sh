@@ -40,6 +40,10 @@ if [ ! -f "docs/index.html" ]; then
     echo "❌ Erro: Falha ao copiar arquivos"
     exit 1
 fi
+
+# Cria arquivo .nojekyll para evitar problemas com GitHub Pages
+touch docs/.nojekyll
+
 echo "✅ Arquivos copiados para /docs"
 echo ""
 
