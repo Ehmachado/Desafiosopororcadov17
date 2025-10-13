@@ -152,26 +152,35 @@ const OrcamentoSimples = () => {
 
   return (
     <div>
-      {/* Seção 1: Definir Orçamento por Tipo de Carteira */}
+      {/* Seção 1: Definir Orçamento por Tipo de Carteira × Produto */}
       <div className="bb-card">
         <div className="bb-card-header">
-          <h2 className="bb-card-title">Campo 3 — Orçamento por Tipo de Carteira</h2>
-          <p className="bb-card-subtitle">Defina o orçamento para cada tipo de carteira</p>
+          <h2 className="bb-card-title">Campo 3 — Orçamento por Tipo de Carteira × Produto</h2>
+          <p className="bb-card-subtitle">Defina o orçamento para cada combinação de tipo de carteira e produto</p>
         </div>
 
         {carteiras.length === 0 ? (
           <div style={{ padding: '16px', background: '#fff3cd', borderRadius: '8px', color: '#856404' }}>
             Carregue as carteiras primeiro no Campo 2
           </div>
+        ) : produtos.length === 0 ? (
+          <div style={{ padding: '16px', background: '#fff3cd', borderRadius: '8px', color: '#856404' }}>
+            Configure os produtos primeiro no Campo 1
+          </div>
         ) : (
           <>
-            <div style={{ marginBottom: '24px' }}>
+            <div style={{ marginBottom: '24px', overflowX: 'auto' }}>
               <table className="data-table">
                 <thead>
                   <tr>
                     <th>Tipo de Carteira</th>
                     <th>Qtd. Carteiras</th>
-                    <th style={{ minWidth: '200px' }}>Orçamento (R$)</th>
+                    {produtos.map(produto => (
+                      <th key={produto} style={{ minWidth: '150px', textAlign: 'center' }}>
+                        {produto}<br/>
+                        <span style={{ fontSize: '12px', fontWeight: 'normal' }}>Orçamento (R$)</span>
+                      </th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
@@ -181,17 +190,22 @@ const OrcamentoSimples = () => {
                       <tr key={tipo}>
                         <td style={{ fontWeight: 600 }}>{tipo}</td>
                         <td>{qtd} carteiras</td>
-                        <td>
-                          <input
-                            type="number"
-                            value={inputValues[tipo] || ''}
-                            onChange={(e) => handleInputChange(tipo, e.target.value)}
-                            className="bb-input"
-                            placeholder="0.00"
-                            step="0.01"
-                            style={{ maxWidth: '180px' }}
-                          />
-                        </td>
+                        {produtos.map(produto => {
+                          const key = `${tipo}-${produto}`;
+                          return (
+                            <td key={produto}>
+                              <input
+                                type="number"
+                                value={inputValues[key] || ''}
+                                onChange={(e) => handleInputChange(tipo, produto, e.target.value)}
+                                className="bb-input"
+                                placeholder="0.00"
+                                step="0.01"
+                                style={{ maxWidth: '140px' }}
+                              />
+                            </td>
+                          );
+                        })}
                       </tr>
                     );
                   })}
@@ -218,7 +232,7 @@ const OrcamentoSimples = () => {
         <div className="bb-card">
           <div className="bb-card-header">
             <h2 className="bb-card-title">Potencial de Seguridade</h2>
-            <p className="bb-card-subtitle">Orçamento × Quantidade de Carteiras por Tipo</p>
+            <p className="bb-card-subtitle">Orçamento × Quantidade de Carteiras por Tipo × Produto</p>
           </div>
 
           <div style={{ padding: '20px', background: 'linear-gradient(135deg, var(--bb-blue) 0%, var(--bb-blue-light) 100%)', borderRadius: '12px', color: 'white', marginBottom: '20px' }}>
@@ -231,28 +245,32 @@ const OrcamentoSimples = () => {
             </div>
           </div>
 
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Tipo de Carteira</th>
-                <th>Qtd. Carteiras</th>
-                <th>Orçamento Unitário</th>
-                <th>Potencial Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {Object.entries(potenciais).map(([tipo, dados]) => (
-                <tr key={tipo}>
-                  <td style={{ fontWeight: 600 }}>{tipo}</td>
-                  <td>{dados.qtdCarteiras}</td>
-                  <td>{formatCurrency(dados.orcamento)}</td>
-                  <td style={{ fontWeight: 600, color: 'var(--bb-blue)' }}>
-                    {formatCurrency(dados.potencial)}
-                  </td>
+          <div style={{ overflowX: 'auto' }}>
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Tipo de Carteira</th>
+                  <th>Produto</th>
+                  <th>Qtd. Carteiras</th>
+                  <th>Orçamento Unitário</th>
+                  <th>Potencial Total</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {Object.values(potenciais).map((dados) => (
+                  <tr key={`${dados.tipo}|${dados.produto}`}>
+                    <td style={{ fontWeight: 600 }}>{dados.tipo}</td>
+                    <td>{dados.produto}</td>
+                    <td>{dados.qtdCarteiras}</td>
+                    <td>{formatCurrency(dados.orcamento)}</td>
+                    <td style={{ fontWeight: 600, color: 'var(--bb-blue)' }}>
+                      {formatCurrency(dados.potencial)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
@@ -269,7 +287,6 @@ const OrcamentoSimples = () => {
               <tr>
                 <th>Prefixo</th>
                 <th>Agência</th>
-                <th>Qtd. Carteiras</th>
                 <th>Orçamento Total</th>
               </tr>
             </thead>
@@ -278,7 +295,6 @@ const OrcamentoSimples = () => {
                 <tr key={agencia.prefixo}>
                   <td style={{ fontWeight: 600 }}>{agencia.prefixo}</td>
                   <td>{agencia.agencia}</td>
-                  <td>{agencia.carteiras.length}</td>
                   <td style={{ fontWeight: 600, color: 'var(--bb-blue)' }}>
                     {formatCurrency(agencia.total)}
                   </td>
