@@ -11,6 +11,7 @@ const ControleDiario = () => {
   const [realizadosTipo, setRealizadosTipo] = useLocalStorage('realizados_tipo', []);
   const [diaAtual, setDiaAtual] = useState(1);
   const [valoresDia, setValoresDia] = useState({});
+  const [valoresInicializados, setValoresInicializados] = useState(false);
 
   const produtosComVidinha = [...produtos];
   if (produtos.includes('Vida') && !produtosComVidinha.includes('Vidinha')) {
