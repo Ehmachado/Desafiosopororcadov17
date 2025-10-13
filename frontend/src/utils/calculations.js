@@ -14,6 +14,18 @@ export const calculateOrcadoPorAgencia = (prefixo, carteiras, orcadosPorTipo, or
   
   const carteirasAgencia = carteiras.filter(c => c.prefixo === prefixo);
   
+  // NOVO FORMATO: orcadosPorTipo é um objeto { tipoCarteira: valor }
+  if (typeof orcadosPorTipo === 'object' && !Array.isArray(orcadosPorTipo)) {
+    let totalOrcado = 0;
+    carteirasAgencia.forEach(cart => {
+      const tipo = cart.tipoCarteira;
+      const orcamento = orcadosPorTipo[tipo] || 0;
+      totalOrcado += parseNumericValue(orcamento);
+    });
+    return totalOrcado;
+  }
+  
+  // FORMATO ANTIGO: orcadosPorTipo é um array
   // Contar quantas carteiras de cada tipo
   const tiposCount = {};
   carteirasAgencia.forEach(cart => {
