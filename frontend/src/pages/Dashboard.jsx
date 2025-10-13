@@ -44,7 +44,10 @@ const Dashboard = () => {
                 Banco do Brasil — Sistema de Gestão e Acompanhamento
               </p>
             </div>
-            <BackupManager />
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <BackupManager />
+              <ResetManager />
+            </div>
           </div>
         </header>
 
