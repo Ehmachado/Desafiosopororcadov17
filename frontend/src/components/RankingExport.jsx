@@ -104,14 +104,22 @@ const RankingExport = () => {
           // Mapear "Vida Total" para "Vida" nos orçamentos
           const produtoBusca = produto === 'Vida Total' ? 'Vida' : produto;
           
-          tiposUnicos.forEach(tipo => {
-            const orcadoTipo = orcadosPorTipo.find(o => 
-              o.tipoCarteira === tipo && o.produto === produtoBusca
-            );
-            if (orcadoTipo) {
-              orcadoProduto += parseFloat(orcadoTipo.valor) || 0;
-            }
-          });
+          // Se não houver tipos únicos (carteiras sem tipoCarteira), buscar diretamente
+          if (tiposUnicos.length === 0 || tiposUnicos.every(t => !t)) {
+            // Buscar todos os orçados deste produto
+            const orcadosProduto = orcadosPorTipo.filter(o => o.produto === produtoBusca);
+            orcadoProduto = orcadosProduto.reduce((sum, o) => sum + (parseFloat(o.valor) || 0), 0);
+          } else {
+            // Buscar por tipo de carteira
+            tiposUnicos.forEach(tipo => {
+              const orcadoTipo = orcadosPorTipo.find(o => 
+                o.tipoCarteira === tipo && o.produto === produtoBusca
+              );
+              if (orcadoTipo) {
+                orcadoProduto += parseFloat(orcadoTipo.valor) || 0;
+              }
+            });
+          }
           
           orcadosPorProduto[produto] = orcadoProduto;
           
