@@ -113,6 +113,59 @@ const RealizadoCarteira = () => {
         <strong>Importante:</strong> Os dados deste campo habilitam a unidade "Carteiras" no Ranking. Sem dados, apenas "Agência" estará disponível.
       </div>
 
+      {/* Controle Diário */}
+      <div style={{ 
+        marginBottom: '24px', 
+        padding: '20px', 
+        background: 'linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)',
+        borderRadius: '12px',
+        border: '2px solid #2196f3'
+      }}>
+        <h3 style={{ 
+          fontSize: '18px', 
+          fontWeight: 700, 
+          color: '#1565c0', 
+          marginBottom: '16px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
+        }}>
+          <Calendar size={20} />
+          Controle Diário do Desafio
+        </h3>
+        <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <div>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#1565c0' }}>
+              Dia do Desafio:
+            </label>
+            <select
+              value={selectedDay}
+              onChange={(e) => setSelectedDay(Number(e.target.value))}
+              className="bb-input"
+              style={{ maxWidth: '150px' }}
+              data-testid="day-select-carteira"
+            >
+              {Array.from({ length: diasDesafio }, (_, i) => i + 1).map(day => (
+                <option key={day} value={day}>Dia {day}</option>
+              ))}
+            </select>
+          </div>
+          <div style={{ 
+            padding: '12px 20px', 
+            background: 'white', 
+            borderRadius: '8px',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+          }}>
+            <span style={{ fontSize: '14px', color: '#666', display: 'block' }}>
+              Visualizando até:
+            </span>
+            <span style={{ fontSize: '20px', fontWeight: 700, color: '#1565c0' }}>
+              Dia {selectedDay} de {diasDesafio}
+            </span>
+          </div>
+        </div>
+      </div>
+
       <div style={{ marginBottom: '24px' }}>
         <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: 'var(--bb-gray-700)' }}>
           Cole os dados (TAB delimitado):
