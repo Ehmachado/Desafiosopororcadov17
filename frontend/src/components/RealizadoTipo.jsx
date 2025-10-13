@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
-import { TrendingUp, Save } from 'lucide-react';
+import { TrendingUp, Save, Trash2, Calendar } from 'lucide-react';
 import { parseTabDelimited, detectColumns, mapRowsToObjects, parseNumericValue } from '../utils/dataParser';
 import ColumnMapper from './ColumnMapper';
 import DataPreview from './DataPreview';
@@ -8,7 +8,10 @@ import { toast } from 'sonner';
 
 const RealizadoTipo = () => {
   const [produtos] = useLocalStorage('challenge_produtos', []);
+  const [diasDesafio] = useLocalStorage('challenge_dias', 1);
   const [realizados, setRealizados] = useLocalStorage('realizados_tipo', []);
+  const [realizadosDiarios, setRealizadosDiarios] = useLocalStorage('realizados_tipo_diarios', []);
+  const [selectedDay, setSelectedDay] = useState(1);
   const [currentProduto, setCurrentProduto] = useState('');
   const [inputText, setInputText] = useState('');
   const [parsedRows, setParsedRows] = useState([]);
