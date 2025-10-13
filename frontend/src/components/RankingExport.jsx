@@ -30,11 +30,41 @@ const RankingExport = () => {
   const [unidade, setUnidade] = useState('agencia');
   const [nomeDesafio, setNomeDesafio] = useLocalStorage('nome_desafio', ''); // Auto-save no localStorage
   const [nomeSuper, setNomeSuper] = useLocalStorage('nome_super', ''); // Nome da Super Regional
-  const [simboloSuper, setSimboloSuper] = useLocalStorage('simbolo_super', ''); // Símbolo da Super
+  const [simboloSuper, setSimboloSuper] = useLocalStorage('simbolo_super', ''); // Imagem da Super (base64)
   const [temaIndex, setTemaIndex] = useState(0);
   const [baseCalculo, setBaseCalculo] = useState('carteira');
   const [rankingData, setRankingData] = useState([]);
   const [diaFiltro, setDiaFiltro] = useState(null);
+
+  // Função para fazer upload da imagem do símbolo
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validar tamanho (max 2MB)
+      if (file.size > 2 * 1024 * 1024) {
+        toast.error('Imagem muito grande! Máximo 2MB.');
+        return;
+      }
+
+      // Validar tipo
+      if (!file.type.startsWith('image/')) {
+        toast.error('Por favor, selecione uma imagem válida.');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setSimboloSuper(event.target.result);
+        toast.success('Imagem carregada com sucesso!');
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setSimboloSuper('');
+    toast.success('Imagem removida!');
+  };
 
   const hasCarteirasData = realizadosCarteira.length > 0;
   const tema = THEME_VARIANTS[temaIndex];
