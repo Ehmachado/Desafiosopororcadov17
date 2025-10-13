@@ -61,6 +61,65 @@ const RealizadoTipo = () => {
     toast.success(`Realizado de ${currentProduto} salvo com sucesso!`);
   };
 
+  const handleSaveDiario = () => {
+    if (previewData.length === 0) {
+      toast.error('Nenhum dado para salvar');
+      return;
+    }
+
+    // Remove dados do mesmo dia e produto antes de salvar
+    const updated = realizadosDiarios.filter(
+      r => !(r.dia === selectedDay && r.produto === currentProduto)
+    );
+
+    const dailyData = previewData.map(item => ({
+      ...item,
+      dia: selectedDay
+    }));
+
+    setRealizadosDiarios([...updated, ...dailyData]);
+    setInputText('');
+    toast.success(`Realizado diário do Dia ${selectedDay} - ${currentProduto} salvo!`);
+  };
+
+  const handleClearDiario = () => {
+    if (!currentProduto) {
+      toast.error('Selecione um produto primeiro');
+      return;
+    }
+
+    const updated = realizadosDiarios.filter(
+      r => !(r.dia === selectedDay && r.produto === currentProduto)
+    );
+    setRealizadosDiarios(updated);
+    toast.success(`Dados do Dia ${selectedDay} - ${currentProduto} removidos!`);
+  };
+
+  // Calcular acumulado total por produto e prefixo
+  const realizadoAcumulado = useMemo(() => {
+    const acumulado = [];
+    
+    produtosComVidinha.forEach(produto => {
+      // Agrupar por prefixo
+      const porPrefixo = {};
+      
+      realizadosDiarios
+        .filter(r => r.produto === produto && r.dia <= selectedDay)
+        .forEach(r => {
+          if (!porPrefixo[r.prefixo]) {
+            porPrefixo[r.prefixo] = 0;
+          }
+          porPrefixo[r.prefixo] += r.valor;
+        });
+
+      Object.entries(porPrefixo).forEach(([prefixo, valor]) => {
+        acumulado.push({ prefixo, produto, valor });
+      });
+    });
+
+    return acumulado;
+  }, [realizadosDiarios, selectedDay, produtosComVidinha]);
+
   return (
     <div className="bb-card">
       <div className="bb-card-header">
