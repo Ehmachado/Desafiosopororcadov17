@@ -28,7 +28,7 @@ const RankingExport = () => {
   const [diasDesafio] = useLocalStorage('challenge_dias', 30);
 
   const [unidade, setUnidade] = useState('agencia');
-  const [nomeDesafio, setNomeDesafio] = useState('');
+  const [nomeDesafio, setNomeDesafio] = useLocalStorage('nome_desafio', ''); // Auto-save no localStorage
   const [temaIndex, setTemaIndex] = useState(0);
   const [baseCalculo, setBaseCalculo] = useState('carteira');
   const [rankingData, setRankingData] = useState([]);
