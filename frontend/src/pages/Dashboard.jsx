@@ -83,10 +83,6 @@ const Dashboard = () => {
               <Database size={16} style={{ marginRight: '6px' }} />
               Realizado Carteira
             </TabsTrigger>
-            <TabsTrigger value="controle-diario" data-testid="tab-controle-diario">
-              <Calendar size={16} style={{ marginRight: '6px' }} />
-              Controle Diário
-            </TabsTrigger>
             <TabsTrigger value="ranking" data-testid="tab-ranking">
               <FileDown size={16} style={{ marginRight: '6px' }} />
               Ranking & Export
