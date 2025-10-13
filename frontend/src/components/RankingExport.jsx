@@ -318,23 +318,23 @@ const RankingExport = () => {
 
                 {/* Tabela de Ranking */}
                 <div style={{ overflowX: 'auto', border: '2px solid #e8eef7', borderTop: 'none', borderRadius: '0 0 12px 12px' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', background: 'white' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', background: 'white', fontSize }}>
                     <thead>
                       <tr style={{ background: 'var(--bb-blue)', color: 'white' }}>
-                        <th style={{ padding: '12px', textAlign: 'left', fontSize: '14px', fontWeight: '600', position: 'sticky', top: 0, background: 'var(--bb-blue)' }}>Posição</th>
-                        <th style={{ padding: '12px', textAlign: 'left', fontSize: '14px', fontWeight: '600', position: 'sticky', top: 0, background: 'var(--bb-blue)' }}>Prefixo</th>
-                        <th style={{ padding: '12px', textAlign: 'left', fontSize: '14px', fontWeight: '600', position: 'sticky', top: 0, background: 'var(--bb-blue)' }}>Dependência</th>
+                        <th style={{ padding, textAlign: 'left', fontSize, fontWeight: '600', position: 'sticky', top: 0, background: 'var(--bb-blue)', whiteSpace: 'nowrap' }}>Pos.</th>
+                        <th style={{ padding, textAlign: 'left', fontSize, fontWeight: '600', position: 'sticky', top: 0, background: 'var(--bb-blue)', whiteSpace: 'nowrap' }}>Prefixo</th>
+                        <th style={{ padding, textAlign: 'left', fontSize, fontWeight: '600', position: 'sticky', top: 0, background: 'var(--bb-blue)', whiteSpace: 'nowrap' }}>Dependência</th>
                         {unidade === 'carteiras' && (
-                          <th style={{ padding: '12px', textAlign: 'left', fontSize: '14px', fontWeight: '600', position: 'sticky', top: 0, background: 'var(--bb-blue)' }}>Carteira</th>
+                          <th style={{ padding, textAlign: 'left', fontSize, fontWeight: '600', position: 'sticky', top: 0, background: 'var(--bb-blue)', whiteSpace: 'nowrap' }}>Carteira</th>
                         )}
-                        <th style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: '600', position: 'sticky', top: 0, background: 'var(--bb-blue)' }}>Orçado (R$)</th>
+                        <th style={{ padding, textAlign: 'right', fontSize, fontWeight: '600', position: 'sticky', top: 0, background: 'var(--bb-blue)', whiteSpace: 'nowrap' }}>Orçado</th>
                         {(unidade === 'agencia' ? produtosRanking : ['Total']).map(produto => (
                           <React.Fragment key={produto}>
-                            <th style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: '600', position: 'sticky', top: 0, background: 'var(--bb-blue)' }}>
-                              {produto}<br/>Valor (R$)
+                            <th style={{ padding, textAlign: 'right', fontSize, fontWeight: '600', position: 'sticky', top: 0, background: 'var(--bb-blue)', whiteSpace: 'nowrap' }}>
+                              {produto}<br/>Valor
                             </th>
-                            <th style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: '600', position: 'sticky', top: 0, background: 'var(--bb-blue)' }}>
-                              {produto}<br/>% Ating.
+                            <th style={{ padding, textAlign: 'right', fontSize, fontWeight: '600', position: 'sticky', top: 0, background: 'var(--bb-blue)', whiteSpace: 'nowrap' }}>
+                              {produto}<br/>%
                             </th>
                           </React.Fragment>
                         ))}
