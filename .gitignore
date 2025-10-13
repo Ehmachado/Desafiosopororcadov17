@@ -26,9 +26,11 @@ next-env.d.ts
 *.tsbuildinfo
 
 # Production builds
-/build
+frontend/build
 dist/
 dist
+# Não ignore /docs - necessário para GitHub Pages
+# /docs
 
 # Environment files (comprehensive coverage)
 
