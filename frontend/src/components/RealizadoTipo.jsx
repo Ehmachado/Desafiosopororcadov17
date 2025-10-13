@@ -272,18 +272,77 @@ const RealizadoTipo = () => {
         </div>
       )}
 
-      {realizados.length > 0 && (
+      {/* Realizado Acumulado */}
+      {realizadoAcumulado.length > 0 && (
+        <div style={{ marginTop: '32px' }}>
+          <div style={{
+            background: 'linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%)',
+            padding: '20px',
+            borderRadius: '12px',
+            border: '2px solid #ff9800',
+            marginBottom: '16px'
+          }}>
+            <h3 style={{ 
+              fontSize: '18px', 
+              fontWeight: 700, 
+              color: '#e65100', 
+              marginBottom: '8px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}>
+              <TrendingUp size={20} />
+              Realizado Total Acumulado até Dia {selectedDay}
+            </h3>
+            <p style={{ fontSize: '14px', color: '#bf360c' }}>
+              Este é o valor que será usado no Ranking (Campo 8)
+            </p>
+          </div>
+
+          <div style={{ overflowX: 'auto' }}>
+            <table className="bb-table">
+              <thead>
+                <tr>
+                  <th>Prefixo</th>
+                  <th>Produto</th>
+                  <th>Valor Acumulado</th>
+                </tr>
+              </thead>
+              <tbody>
+                {realizadoAcumulado
+                  .sort((a, b) => a.prefixo.localeCompare(b.prefixo))
+                  .map((item, index) => (
+                    <tr key={index}>
+                      <td>{item.prefixo}</td>
+                      <td>
+                        <span className="bb-badge bb-badge-primary">
+                          {item.produto}
+                        </span>
+                      </td>
+                      <td style={{ fontWeight: 600, color: 'var(--bb-blue)' }}>
+                        {item.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                      </td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Dados Diários Salvos */}
+      {realizadosDiarios.length > 0 && (
         <div style={{ marginTop: '24px' }}>
           <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--bb-blue)', marginBottom: '12px' }}>
-            Dados Salvos ({realizados.length} registros)
+            Dados Diários Salvos
           </h3>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
-            {produtosComVidinha.map(produto => {
-              const count = realizados.filter(r => r.produto === produto).length;
-              if (count === 0) return null;
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+            {Array.from({ length: diasDesafio }, (_, i) => i + 1).map(dia => {
+              const countDia = realizadosDiarios.filter(r => r.dia === dia).length;
+              if (countDia === 0) return null;
               return (
-                <span key={produto} className="bb-badge bb-badge-success">
-                  {produto}: {count} registros
+                <span key={dia} className="bb-badge bb-badge-success">
+                  Dia {dia}: {countDia} registros
                 </span>
               );
             })}
