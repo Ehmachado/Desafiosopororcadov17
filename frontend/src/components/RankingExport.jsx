@@ -41,6 +41,40 @@ const RankingExport = () => {
     produtosRanking[vidaIndex] = 'Vida Total';
   }
 
+  // Calcula tamanhos dinâmicos baseado no número de produtos
+  const numProdutos = unidade === 'agencia' ? produtosRanking.length : 1;
+  const numColunas = 4 + (numProdutos * 2); // Posição, Prefixo, Dependência, Orçado + (Valor + % para cada produto)
+  
+  // Ajusta tamanho de fonte e padding baseado no número de produtos
+  const getFontSize = () => {
+    if (numProdutos <= 3) return '14px';
+    if (numProdutos <= 5) return '12px';
+    return '10px';
+  };
+  
+  const getPadding = () => {
+    if (numProdutos <= 3) return '12px';
+    if (numProdutos <= 5) return '10px';
+    return '8px';
+  };
+  
+  const getHeaderFontSize = () => {
+    if (numProdutos <= 3) return '42px';
+    if (numProdutos <= 5) return '36px';
+    return '32px';
+  };
+  
+  const getSubHeaderFontSize = () => {
+    if (numProdutos <= 3) return '28px';
+    if (numProdutos <= 5) return '24px';
+    return '20px';
+  };
+  
+  const fontSize = getFontSize();
+  const padding = getPadding();
+  const headerFontSize = getHeaderFontSize();
+  const subHeaderFontSize = getSubHeaderFontSize();
+
   const calculateRanking = () => {
     if (unidade === 'agencia') {
       const prefixosUnicos = [...new Set(carteiras.map(c => c.prefixo).filter(Boolean))];
