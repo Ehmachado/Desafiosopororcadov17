@@ -152,7 +152,7 @@ const RedesConfig = () => {
                 </tr>
               </thead>
               <tbody>
-                {redes.slice(0, 50).map((r, idx) => (
+                {redes.slice(0, 200).map((r, idx) => (
                   <tr key={idx}>
                     <td>{r.prefixo}</td>
                     <td>{r.agencia}</td>
@@ -161,9 +161,9 @@ const RedesConfig = () => {
                 ))}
               </tbody>
             </table>
-            {redes.length > 50 && (
+            {redes.length > 200 && (
               <p style={{ textAlign: 'center', padding: '12px', color: 'var(--bb-gray-600)', fontSize: '14px' }}>
-                Mostrando 50 de {redes.length} registros
+                Mostrando 200 de {redes.length} registros
               </p>
             )}
           </div>
