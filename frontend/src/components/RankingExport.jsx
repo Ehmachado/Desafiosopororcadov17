@@ -95,7 +95,14 @@ const RankingExport = () => {
         const orcadosPorProduto = {};
 
         // Calcular orçado por produto
-        const tiposUnicos = [...new Set(carteirasPrefixo.map(c => c.tipoCarteira).filter(Boolean))];
+        // Primeiro, contar quantas carteiras de cada tipo esta agência tem
+        const tiposCount = {};
+        carteirasPrefixo.forEach(cart => {
+          const tipo = cart.tipoCarteira;
+          if (tipo) {
+            tiposCount[tipo] = (tiposCount[tipo] || 0) + 1;
+          }
+        });
         
         produtosRanking.forEach(produto => {
           // Calcular orçado para este produto específico
@@ -104,13 +111,13 @@ const RankingExport = () => {
           // Mapear "Vida Total" para "Vida" nos orçamentos
           const produtoBusca = produto === 'Vida Total' ? 'Vida' : produto;
           
-          // Buscar por tipo de carteira
-          tiposUnicos.forEach(tipo => {
+          // Para cada tipo de carteira, multiplicar orçado × quantidade
+          Object.entries(tiposCount).forEach(([tipo, qtd]) => {
             const orcadoTipo = orcadosPorTipo.find(o => 
               o.tipoCarteira === tipo && o.produto === produtoBusca
             );
             if (orcadoTipo) {
-              orcadoProduto += parseFloat(orcadoTipo.valor) || 0;
+              orcadoProduto += (parseFloat(orcadoTipo.valor) || 0) * qtd;
             }
           });
           
