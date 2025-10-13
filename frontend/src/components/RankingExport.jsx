@@ -292,11 +292,11 @@ const RankingExport = () => {
       csv += `${row.prefixo};${row.agencia || row.dependencia}`;
       
       produtosRanking.forEach(produto => {
-        const orcado = row.orcados?.[produto] || 0;
-        const realizado = row.realizados?.[produto] || 0;
-        const atingimento = orcado > 0 ? ((realizado / orcado) * 100).toFixed(2) : '0.00';
+        const orcado = row.orcadosPorProduto?.[produto] || 0;
+        const realizado = row.valores?.[produto] || 0;
+        const atingimento = row.atingimentos?.[produto] || 0;
         
-        csv += `;${orcado.toFixed(2)};${realizado.toFixed(2)};${atingimento}%`;
+        csv += `;${orcado.toFixed(2)};${realizado.toFixed(2)};${atingimento.toFixed(2)}%`;
       });
       
       csv += '\n';
