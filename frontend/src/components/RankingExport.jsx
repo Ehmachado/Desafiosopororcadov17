@@ -145,12 +145,13 @@ const RankingExport = () => {
         );
         const orcado = orcadoCarteira ? orcadoCarteira.valor * (orcadoCarteira.fatorMeta || 100) / 100 : 0;
 
-        // Usa realizadosDiarios se houver dados, senão usa realizadosCarteira
+        // Usa realizadosDiariosCarteira se houver dados, senão usa realizadosCarteira
         let realizado = 0;
-        if (realizadosDiarios.length > 0) {
-          // Soma todos os dias salvos para esta carteira
-          realizado = realizadosDiarios
-            .filter(r => r.tipo === 'carteira' && r.prefixo === c.prefixo && r.carteira === c.carteira)
+        if (realizadosDiariosCarteira.length > 0) {
+          // Soma todos os dias salvos até diaFiltro para esta carteira
+          const diaLimite = diaFiltro || diasDesafio;
+          realizado = realizadosDiariosCarteira
+            .filter(r => r.prefixo === c.prefixo && r.carteira === c.carteira && r.dia <= diaLimite)
             .reduce((sum, r) => sum + (parseFloat(r.valor) || 0), 0);
         } else {
           // Fallback para realizadosCarteira (compatibilidade)
