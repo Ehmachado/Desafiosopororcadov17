@@ -252,6 +252,7 @@ const RankingExport = () => {
   const handleAtualizarRanking = () => {
     const data = calculateRanking();
     setRankingData(data);
+    setUltimaAtualizacao(new Date()); // Captura data e hora da atualização
     toast.success('Ranking atualizado!');
   };
 
@@ -268,6 +269,51 @@ const RankingExport = () => {
     }
     await exportAllRedes(redesUnicas);
     toast.success('Exportação de todas as redes concluída!');
+  };
+
+  // Função para exportar versão simplificada (CSV)
+  const handleExportSimplificado = () => {
+    if (rankingData.length === 0) {
+      toast.error('Atualize o ranking primeiro!');
+      return;
+    }
+
+    // Cabeçalho CSV
+    let csv = 'Prefixo;Agência';
+    
+    // Adicionar produtos como colunas
+    produtosRanking.forEach(produto => {
+      csv += `;Orçado ${produto};Realizado ${produto};% Atingimento ${produto}`;
+    });
+    csv += '\n';
+
+    // Dados
+    rankingData.forEach(row => {
+      csv += `${row.prefixo};${row.agencia || row.dependencia}`;
+      
+      produtosRanking.forEach(produto => {
+        const orcado = row.orcados?.[produto] || 0;
+        const realizado = row.realizados?.[produto] || 0;
+        const atingimento = orcado > 0 ? ((realizado / orcado) * 100).toFixed(2) : '0.00';
+        
+        csv += `;${orcado.toFixed(2)};${realizado.toFixed(2)};${atingimento}%`;
+      });
+      
+      csv += '\n';
+    });
+
+    // Download
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `ranking-simplificado-${nomeDesafio || 'desafio'}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast.success('Exportação simplificada concluída!');
   };
 
   useEffect(() => {
