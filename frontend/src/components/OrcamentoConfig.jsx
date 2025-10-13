@@ -25,16 +25,20 @@ const OrcamentoConfig = () => {
 
   // Sincronizar com orcadosPorTipo quando houver mudanças (carregar valores salvos)
   useEffect(() => {
-    // Apenas sincronizar se tipoOrcamentos estiver vazio
-    if (Object.keys(tipoOrcamentos).length === 0 && orcadosPorTipo.length > 0) {
-      const existing = {};
-      orcadosPorTipo.forEach(o => {
-        const key = `${o.produto}-${o.tipoCarteira}`;
-        existing[key] = o.valor;
+    if (orcadosPorTipo.length > 0) {
+      setTipoOrcamentos(prev => {
+        const updated = { ...prev };
+        orcadosPorTipo.forEach(o => {
+          const key = `${o.produto}-${o.tipoCarteira}`;
+          // Só atualiza se o valor não existir ou for diferente
+          if (!updated[key] || updated[key] !== o.valor) {
+            updated[key] = o.valor;
+          }
+        });
+        return updated;
       });
-      setTipoOrcamentos(existing);
     }
-  }, [orcadosPorTipo]);
+  }, [orcadosPorTipo, setTipoOrcamentos]);
 
   // Adicionar chaves para novos produtos quando mudarem
   useEffect(() => {
