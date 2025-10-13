@@ -150,7 +150,8 @@ const RankingExport = () => {
           rede,
           orcado,
           valores,
-          atingimentos
+          atingimentos,
+          orcadosPorProduto
         };
       });
 
