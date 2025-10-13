@@ -143,7 +143,18 @@ const RankingExport = () => {
         );
         const orcado = orcadoCarteira ? orcadoCarteira.valor * (orcadoCarteira.fatorMeta || 100) / 100 : 0;
 
-        const realizado = calculateRealizadoPorCarteira(c.prefixo, c.carteira, realizadosCarteira, diaFiltro);
+        // Usa realizadosDiarios se houver dados, senão usa realizadosCarteira
+        let realizado = 0;
+        if (realizadosDiarios.length > 0) {
+          // Soma todos os dias salvos para esta carteira
+          realizado = realizadosDiarios
+            .filter(r => r.tipo === 'carteira' && r.prefixo === c.prefixo && r.carteira === c.carteira)
+            .reduce((sum, r) => sum + (parseFloat(r.valor) || 0), 0);
+        } else {
+          // Fallback para realizadosCarteira (compatibilidade)
+          realizado = calculateRealizadoPorCarteira(c.prefixo, c.carteira, realizadosCarteira, diaFiltro);
+        }
+        
         const atingimento = calculateAtingimento(realizado, orcado);
 
         rankingsCarteira.push({
