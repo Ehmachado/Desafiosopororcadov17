@@ -92,8 +92,30 @@ const RankingExport = () => {
 
         const atingimentos = {};
         const valores = {};
+        const orcadosPorProduto = {};
 
+        // Calcular orçado por produto
+        const carteirasPrefixo = carteiras.filter(c => c.prefixo === prefixo);
+        const tiposUnicos = [...new Set(carteirasPrefixo.map(c => c.tipoCarteira))];
+        
         produtosRanking.forEach(produto => {
+          // Calcular orçado para este produto específico
+          let orcadoProduto = 0;
+          
+          // Mapear "Vida Total" para "Vida" nos orçamentos
+          const produtoBusca = produto === 'Vida Total' ? 'Vida' : produto;
+          
+          tiposUnicos.forEach(tipo => {
+            const orcadoTipo = orcadosPorTipo.find(o => 
+              o.tipoCarteira === tipo && o.produto === produtoBusca
+            );
+            if (orcadoTipo) {
+              orcadoProduto += parseFloat(orcadoTipo.valor) || 0;
+            }
+          });
+          
+          orcadosPorProduto[produto] = orcadoProduto;
+          
           // Usa realizadosDiariosTipo se houver dados, senão usa realizadosTipo
           let realizado = 0;
           if (realizadosDiariosTipo.length > 0) {
@@ -119,7 +141,7 @@ const RankingExport = () => {
           }
           
           valores[produto] = realizado;
-          atingimentos[produto] = calculateAtingimento(realizado, orcado);
+          atingimentos[produto] = calculateAtingimento(realizado, orcadoProduto);
         });
 
         return {
