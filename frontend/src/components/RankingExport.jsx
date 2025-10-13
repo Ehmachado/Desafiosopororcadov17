@@ -304,14 +304,14 @@ const RankingExport = () => {
                 <div style={{ 
                   background: tema.headerBg,
                   color: tema.headerColor,
-                  padding: '32px 24px',
+                  padding: numProdutos > 5 ? '24px 20px' : '32px 24px',
                   borderRadius: '12px 12px 0 0',
                   marginBottom: '0'
                 }}>
-                  <h1 style={{ fontSize: '42px', fontWeight: '700', marginBottom: '12px', textAlign: 'center', lineHeight: '1.2' }}>
+                  <h1 style={{ fontSize: headerFontSize, fontWeight: '700', marginBottom: '12px', textAlign: 'center', lineHeight: '1.2' }}>
                     {nomeDesafio || 'Ranking de Desafios de Seguridade'}
                   </h1>
-                  <p style={{ fontSize: '28px', fontWeight: '600', textAlign: 'center', color: tema.accentColor, lineHeight: '1.3' }}>
+                  <p style={{ fontSize: subHeaderFontSize, fontWeight: '600', textAlign: 'center', color: tema.accentColor, lineHeight: '1.3' }}>
                     Rede {rede}
                   </p>
                 </div>
