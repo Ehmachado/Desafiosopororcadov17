@@ -87,31 +87,34 @@ const RankingExport = () => {
         const redeInfo = redes.find(r => r.prefixo === prefixo);
         const rede = redeInfo?.rede || 'Sem Rede';
 
-        // Calcular orçado por agência baseado no tipo de carteira
-        let orcado = 0;
-        const tiposCount = {};
-        
-        carteirasPrefixo.forEach(cart => {
-          const tipo = cart.tipoCarteira;
-          if (tipo) {
-            tiposCount[tipo] = (tiposCount[tipo] || 0) + 1;
-          }
-        });
-        
-        Object.entries(tiposCount).forEach(([tipo, qtd]) => {
-          const orcadoTipo = orcadosPorTipo.find(o => o.tipoCarteira === tipo);
-          if (orcadoTipo) {
-            orcado += qtd * parseFloat(orcadoTipo.valor);
-          }
-        });
+        const useCarteiraBase = baseCalculo === 'carteira' && orcadosPorCarteira.length > 0;
+        const orcado = calculateOrcadoPorAgencia(prefixo, carteiras, orcadosPorTipo, orcadosPorCarteira, useCarteiraBase);
 
         const atingimentos = {};
         const valores = {};
         const orcadosPorProduto = {};
+
+        // Calcular orçado por produto
+        const tiposUnicos = [...new Set(carteirasPrefixo.map(c => c.tipoCarteira).filter(Boolean))];
         
         produtosRanking.forEach(produto => {
-          // Para cada produto, o orçado é o mesmo (orçado total da agência)
-          orcadosPorProduto[produto] = orcado;
+          // Calcular orçado para este produto específico
+          let orcadoProduto = 0;
+          
+          // Mapear "Vida Total" para "Vida" nos orçamentos
+          const produtoBusca = produto === 'Vida Total' ? 'Vida' : produto;
+          
+          // Buscar por tipo de carteira
+          tiposUnicos.forEach(tipo => {
+            const orcadoTipo = orcadosPorTipo.find(o => 
+              o.tipoCarteira === tipo && o.produto === produtoBusca
+            );
+            if (orcadoTipo) {
+              orcadoProduto += parseFloat(orcadoTipo.valor) || 0;
+            }
+          });
+          
+          orcadosPorProduto[produto] = orcadoProduto;
           
           // Usa realizadosDiariosTipo se houver dados, senão usa realizadosTipo
           let realizado = 0;
