@@ -80,21 +80,19 @@ Sistema de gestão e acompanhamento de desafios de seguridade para o Banco do Br
 
 ## 🚀 Deploy no GitHub Pages
 
-### Opção 1: Deploy from a branch (Recomendado)
+### ✅ Solução Definitiva (1 comando)
 ```bash
-./deploy-gh-pages.sh
+./deploy-para-github.sh
 ```
-Depois configure: Settings → Pages → gh-pages → /root
+**Depois configure**: Settings → Pages → Branch: `main` → Folder: `/docs`
 
-📖 **Guia completo**: `DEPLOY_FROM_BRANCH.md`
+📖 **Guia completo**: `GUIA_DEPLOY_SIMPLES.md`
 
-### Opção 2: GitHub Actions (Automático)
-```bash
-git push origin main
-```
-Configure: Settings → Pages → GitHub Actions
+---
 
-📖 **Guia completo**: `DEPLOY_GITHUB_PAGES.md`
+### Outras opções:
+- `DEPLOY_FROM_BRANCH.md` - Via branch gh-pages
+- `DEPLOY_GITHUB_PAGES.md` - Via GitHub Actions
 
 ## 🔧 Entrada de Dados
 
