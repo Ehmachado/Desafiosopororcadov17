@@ -78,6 +78,22 @@ Sistema de gestão e acompanhamento de desafios de seguridade para o Banco do Br
 5. Registre realizados (Campos 5-6)
 6. Gere ranking e exporte (Campo 8)
 
+## 🚀 Deploy no GitHub Pages
+
+**Método Rápido (Automático)**:
+```bash
+git push origin main
+```
+O GitHub Actions fará deploy automaticamente!
+
+**Método Manual**:
+```bash
+cd frontend
+yarn deploy
+```
+
+📖 **Guia completo**: Ver arquivo `DEPLOY_GITHUB_PAGES.md`
+
 ## 🔧 Entrada de Dados
 
 - Copie do Excel (Ctrl+C)
