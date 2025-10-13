@@ -29,6 +29,8 @@ const RankingExport = () => {
 
   const [unidade, setUnidade] = useState('agencia');
   const [nomeDesafio, setNomeDesafio] = useLocalStorage('nome_desafio', ''); // Auto-save no localStorage
+  const [nomeSuper, setNomeSuper] = useLocalStorage('nome_super', ''); // Nome da Super Regional
+  const [simboloSuper, setSimboloSuper] = useLocalStorage('simbolo_super', ''); // Símbolo da Super
   const [temaIndex, setTemaIndex] = useState(0);
   const [baseCalculo, setBaseCalculo] = useState('carteira');
   const [rankingData, setRankingData] = useState([]);
