@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exemplo de Cores - Ranking</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            padding: 40px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #003399;
+            margin-bottom: 10px;
+        }
+        h2 {
+            text-align: center;
+            color: #ffc107;
+            margin-bottom: 30px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 2px solid #e8eef7;
+        }
+        th {
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: white;
+            font-size: 14px;
+        }
+        td {
+            padding: 12px;
+            font-size: 14px;
+            border-bottom: 1px solid #e8eef7;
+        }
+        .header-default { background: #003399; }
+        .header-vida { background: #1976d2; }
+        .header-prest { background: #f57c00; }
+        .header-patrim { background: #388e3c; }
+        
+        /* Linhas alternadas */
+        .row-white { background: #ffffff; }
+        .row-gray { background: #f0f4f8; }
+        
+        /* Cores de produtos - linha branca */
+        .vida-white { background: #e3f2fd; }
+        .prest-white { background: #fff3e0; }
+        .patrim-white { background: #e8f5e9; }
+        
+        /* Cores de produtos - linha cinza */
+        .vida-gray { background: #d1e7f7; }
+        .prest-gray { background: #ffe4c4; }
+        .patrim-gray { background: #d4ead5; }
+        
+        .info {
+            margin-top: 30px;
+            padding: 20px;
+            background: #e3f2fd;
+            border-left: 4px solid #1976d2;
+            border-radius: 8px;
+        }
+        .info h3 {
+            margin-top: 0;
+            color: #1976d2;
+        }
+        .info ul {
+            margin: 10px 0;
+        }
+        .legend {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .legend-box {
+            width: 40px;
+            height: 25px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Desafio Q1 2025</h1>
+        <h2>Rede A</h2>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th class="header-default">Pos.</th>
+                    <th class="header-default">Prefixo</th>
+                    <th class="header-default">Dependência</th>
+                    <th class="header-default">Orçado</th>
+                    <th class="header-vida" colspan="2">Vida Total</th>
+                    <th class="header-prest" colspan="2">Prestamista</th>
+                    <th class="header-patrim" colspan="2">Patrimônio</th>
+                </tr>
+                <tr>
+                    <th class="header-default"></th>
+                    <th class="header-default"></th>
+                    <th class="header-default"></th>
+                    <th class="header-default"></th>
+                    <th class="header-vida">Valor</th>
+                    <th class="header-vida">%</th>
+                    <th class="header-prest">Valor</th>
+                    <th class="header-prest">%</th>
+                    <th class="header-patrim">Valor</th>
+                    <th class="header-patrim">%</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Linha 1 - Branca -->
+                <tr>
+                    <td class="row-white" style="font-weight: 600;">1º</td>
+                    <td class="row-white">1234</td>
+                    <td class="row-white">Agência Centro</td>
+                    <td class="row-white" style="text-align: right; font-weight: 600;">R$ 100.000,00</td>
+                    <td class="vida-white" style="text-align: right;">R$ 15.000,00</td>
+                    <td class="vida-white" style="text-align: right; font-weight: 600; color: #388e3c;">15,0%</td>
+                    <td class="prest-white" style="text-align: right;">R$ 8.000,00</td>
+                    <td class="prest-white" style="text-align: right; font-weight: 600; color: #388e3c;">8,0%</td>
+                    <td class="patrim-white" style="text-align: right;">R$ 5.500,00</td>
+                    <td class="patrim-white" style="text-align: right; font-weight: 600; color: #388e3c;">5,5%</td>
+                </tr>
+                
+                <!-- Linha 2 - Cinza -->
+                <tr>
+                    <td class="row-gray" style="font-weight: 600;">2º</td>
+                    <td class="row-gray">5678</td>
+                    <td class="row-gray">Agência Sul</td>
+                    <td class="row-gray" style="text-align: right; font-weight: 600;">R$ 95.000,00</td>
+                    <td class="vida-gray" style="text-align: right;">R$ 12.000,00</td>
+                    <td class="vida-gray" style="text-align: right; font-weight: 600; color: #f57c00;">12,6%</td>
+                    <td class="prest-gray" style="text-align: right;">R$ 9.500,00</td>
+                    <td class="prest-gray" style="text-align: right; font-weight: 600; color: #388e3c;">10,0%</td>
+                    <td class="patrim-gray" style="text-align: right;">R$ 6.200,00</td>
+                    <td class="patrim-gray" style="text-align: right; font-weight: 600; color: #388e3c;">6,5%</td>
+                </tr>
+                
+                <!-- Linha 3 - Branca -->
+                <tr>
+                    <td class="row-white" style="font-weight: 600;">3º</td>
+                    <td class="row-white">9012</td>
+                    <td class="row-white">Agência Norte</td>
+                    <td class="row-white" style="text-align: right; font-weight: 600;">R$ 105.000,00</td>
+                    <td class="vida-white" style="text-align: right;">R$ 18.000,00</td>
+                    <td class="vida-white" style="text-align: right; font-weight: 600; color: #388e3c;">17,1%</td>
+                    <td class="prest-white" style="text-align: right;">R$ 7.200,00</td>
+                    <td class="prest-white" style="text-align: right; font-weight: 600; color: #d32f2f;">6,9%</td>
+                    <td class="patrim-white" style="text-align: right;">R$ 4.800,00</td>
+                    <td class="patrim-white" style="text-align: right; font-weight: 600; color: #d32f2f;">4,6%</td>
+                </tr>
+                
+                <!-- Linha 4 - Cinza -->
+                <tr>
+                    <td class="row-gray" style="font-weight: 600;">4º</td>
+                    <td class="row-gray">3456</td>
+                    <td class="row-gray">Agência Leste</td>
+                    <td class="row-gray" style="text-align: right; font-weight: 600;">R$ 88.000,00</td>
+                    <td class="vida-gray" style="text-align: right;">R$ 13.500,00</td>
+                    <td class="vida-gray" style="text-align: right; font-weight: 600; color: #388e3c;">15,3%</td>
+                    <td class="prest-gray" style="text-align: right;">R$ 7.800,00</td>
+                    <td class="prest-gray" style="text-align: right; font-weight: 600; color: #f57c00;">8,9%</td>
+                    <td class="patrim-gray" style="text-align: right;">R$ 5.100,00</td>
+                    <td class="patrim-gray" style="text-align: right; font-weight: 600; color: #388e3c;">5,8%</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div class="info">
+            <h3>🎨 Cores Implementadas no Ranking</h3>
+            <ul>
+                <li><strong>Linhas Alternadas:</strong> Melhora a legibilidade com cores #ffffff (branco) e #f0f4f8 (cinza claro)</li>
+                <li><strong>Colunas por Produto:</strong> Cada produto tem uma cor distinta que varia conforme a linha</li>
+                <li><strong>Headers Coloridos:</strong> Cabeçalhos dos produtos têm cores mais escuras para identificação rápida</li>
+            </ul>
+            
+            <h3>📊 Legenda de Cores dos Produtos:</h3>
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-box" style="background: #e3f2fd;"></div>
+                    <span><strong>Vida Total</strong> (Linha Branca)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box" style="background: #d1e7f7;"></div>
+                    <span><strong>Vida Total</strong> (Linha Cinza)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box" style="background: #fff3e0;"></div>
+                    <span><strong>Prestamista</strong> (Linha Branca)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box" style="background: #ffe4c4;"></div>
+                    <span><strong>Prestamista</strong> (Linha Cinza)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box" style="background: #e8f5e9;"></div>
+                    <span><strong>Patrimônio</strong> (Linha Branca)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box" style="background: #d4ead5;"></div>
+                    <span><strong>Patrimônio</strong> (Linha Cinza)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
