@@ -155,7 +155,7 @@ const CarteirasMaster = () => {
                 </tr>
               </thead>
               <tbody>
-                {carteiras.slice(0, 50).map((c, idx) => (
+                {carteiras.slice(0, 200).map((c, idx) => (
                   <tr key={idx}>
                     <td>{c.prefixo}</td>
                     <td>{c.agencia}</td>
@@ -165,9 +165,9 @@ const CarteirasMaster = () => {
                 ))}
               </tbody>
             </table>
-            {carteiras.length > 50 && (
+            {carteiras.length > 200 && (
               <p style={{ textAlign: 'center', padding: '12px', color: 'var(--bb-gray-600)', fontSize: '14px' }}>
-                Mostrando 50 de {carteiras.length} carteiras
+                Mostrando 200 de {carteiras.length} carteiras
               </p>
             )}
           </div>
