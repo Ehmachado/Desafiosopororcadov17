@@ -94,8 +94,7 @@ const RankingExport = () => {
         const valores = {};
         const orcadosPorProduto = {};
 
-        // Calcular orçado por produto
-        const carteirasPrefixo = carteiras.filter(c => c.prefixo === prefixo);
+        // Calcular orçado por produto usando carteirasPrefixo já declarado
         const tiposUnicos = [...new Set(carteirasPrefixo.map(c => c.tipoCarteira))];
         
         produtosRanking.forEach(produto => {
