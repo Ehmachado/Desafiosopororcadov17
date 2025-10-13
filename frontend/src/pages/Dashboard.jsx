@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Settings, Database, TrendingUp, Calendar, BarChart3, FileDown } from 'lucide-react';
+import { Settings, Database, TrendingUp, BarChart3, FileDown } from 'lucide-react';
 import ChallengeConfig from '../components/ChallengeConfig';
 import CarteirasMaster from '../components/CarteirasMaster';
 import OrcamentoConfig from '../components/OrcamentoConfig';
 import RedesConfig from '../components/RedesConfig';
 import RealizadoTipo from '../components/RealizadoTipo';
 import RealizadoCarteira from '../components/RealizadoCarteira';
-import ControleDiario from '../components/ControleDiario';
 import RankingExport from '../components/RankingExport';
 import BackupManager from '../components/BackupManager';
 
