@@ -35,6 +35,7 @@ const RankingExport = () => {
   const [baseCalculo, setBaseCalculo] = useState('carteira');
   const [rankingData, setRankingData] = useState([]);
   const [diaFiltro, setDiaFiltro] = useState(null);
+  const [ultimaAtualizacao, setUltimaAtualizacao] = useState(null); // Data e hora da última atualização
 
   // Função para fazer upload da imagem do símbolo
   const handleImageUpload = (e) => {
