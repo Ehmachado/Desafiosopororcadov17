@@ -202,22 +202,107 @@ const RealizadoCarteira = () => {
         />
       )}
 
-      <button
-        onClick={handleSave}
-        className="bb-btn bb-btn-primary"
-        disabled={previewData.length === 0}
-        data-testid="save-realizado-carteira-btn"
-      >
-        <Save size={16} />
-        Salvar Realizado por Carteira ({previewData.length})
-      </button>
+      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+        <button
+          onClick={handleSaveDiario}
+          className="bb-btn bb-btn-primary"
+          disabled={previewData.length === 0}
+          data-testid="save-realizado-carteira-diario-btn"
+        >
+          <Save size={16} />
+          Salvar Dia {selectedDay} - Carteira ({previewData.length})
+        </button>
+        <button
+          onClick={handleClearDiario}
+          className="bb-btn"
+          style={{ 
+            background: '#dc3545', 
+            color: 'white',
+            border: 'none'
+          }}
+          data-testid="clear-realizado-carteira-diario-btn"
+        >
+          <Trash2 size={16} />
+          Limpar Dia {selectedDay} - Carteira
+        </button>
+      </div>
 
-      {realizados.length > 0 && (
-        <div style={{ marginTop: '24px' }}>
-          <div style={{ padding: '16px', background: 'var(--bb-gray-50)', borderRadius: '8px', borderLeft: '4px solid var(--bb-blue)' }}>
-            <p style={{ fontSize: '14px', color: 'var(--bb-gray-700)' }}>
-              <strong>Total de registros:</strong> {realizados.length}
+      {/* Realizado Acumulado */}
+      {realizadoAcumulado.length > 0 && (
+        <div style={{ marginTop: '32px' }}>
+          <div style={{
+            background: 'linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%)',
+            padding: '20px',
+            borderRadius: '12px',
+            border: '2px solid #ff9800',
+            marginBottom: '16px'
+          }}>
+            <h3 style={{ 
+              fontSize: '18px', 
+              fontWeight: 700, 
+              color: '#e65100', 
+              marginBottom: '8px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}>
+              <TrendingUp size={20} />
+              Realizado Total Acumulado até Dia {selectedDay}
+            </h3>
+            <p style={{ fontSize: '14px', color: '#bf360c' }}>
+              Este é o valor que será usado no Ranking (Campo 8)
             </p>
+          </div>
+
+          <div style={{ overflowX: 'auto' }}>
+            <table className="bb-table">
+              <thead>
+                <tr>
+                  <th>Prefixo</th>
+                  <th>Carteira</th>
+                  <th>Tipo Carteira</th>
+                  <th>Valor Acumulado</th>
+                </tr>
+              </thead>
+              <tbody>
+                {realizadoAcumulado
+                  .sort((a, b) => a.prefixo.localeCompare(b.prefixo))
+                  .map((item, index) => (
+                    <tr key={index}>
+                      <td>{item.prefixo}</td>
+                      <td>{item.carteira}</td>
+                      <td>
+                        <span className="bb-badge bb-badge-primary">
+                          {item.tipoCarteira}
+                        </span>
+                      </td>
+                      <td style={{ fontWeight: 600, color: 'var(--bb-blue)' }}>
+                        {item.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                      </td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Dados Diários Salvos */}
+      {realizadosDiarios.length > 0 && (
+        <div style={{ marginTop: '24px' }}>
+          <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--bb-blue)', marginBottom: '12px' }}>
+            Dados Diários Salvos
+          </h3>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+            {Array.from({ length: diasDesafio }, (_, i) => i + 1).map(dia => {
+              const countDia = realizadosDiarios.filter(r => r.dia === dia).length;
+              if (countDia === 0) return null;
+              return (
+                <span key={dia} className="bb-badge bb-badge-success">
+                  Dia {dia}: {countDia} registros
+                </span>
+              );
+            })}
           </div>
         </div>
       )}
