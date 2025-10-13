@@ -291,6 +291,34 @@ const RankingExport = () => {
 
           <div>
             <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: 'var(--bb-gray-700)', fontSize: '14px' }}>
+              Nome da Super Regional:
+            </label>
+            <input
+              type="text"
+              value={nomeSuper}
+              onChange={(e) => setNomeSuper(e.target.value)}
+              className="bb-input"
+              placeholder="Ex: Super Regional Sul"
+              data-testid="nome-super-input"
+            />
+          </div>
+
+          <div>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: 'var(--bb-gray-700)', fontSize: '14px' }}>
+              Símbolo da Super:
+            </label>
+            <input
+              type="text"
+              value={simboloSuper}
+              onChange={(e) => setSimboloSuper(e.target.value)}
+              className="bb-input"
+              placeholder="Ex: SR-SUL"
+              data-testid="simbolo-super-input"
+            />
+          </div>
+
+          <div>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: 'var(--bb-gray-700)', fontSize: '14px' }}>
               Tema Visual:
             </label>
             <select
