@@ -13,13 +13,22 @@ export const calculateOrcadoPorAgencia = (prefixo, carteiras, orcadosPorTipo, or
   }
   
   const carteirasAgencia = carteiras.filter(c => c.prefixo === prefixo);
-  const tiposUnicos = [...new Set(carteirasAgencia.map(c => c.tipoCarteira))];
+  
+  // Contar quantas carteiras de cada tipo
+  const tiposCount = {};
+  carteirasAgencia.forEach(cart => {
+    const tipo = cart.tipoCarteira;
+    if (tipo) {
+      tiposCount[tipo] = (tiposCount[tipo] || 0) + 1;
+    }
+  });
   
   let totalOrcado = 0;
-  tiposUnicos.forEach(tipo => {
+  Object.entries(tiposCount).forEach(([tipo, qtd]) => {
+    // Soma todos os produtos desse tipo
     const orcadosTipo = orcadosPorTipo.filter(o => o.tipoCarteira === tipo);
     const somaOrcados = orcadosTipo.reduce((sum, o) => sum + parseNumericValue(o.valor), 0);
-    totalOrcado += somaOrcados;
+    totalOrcado += somaOrcados * qtd;
   });
   
   return totalOrcado;
