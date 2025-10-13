@@ -59,6 +59,7 @@
   "scripts": {
     "start": "craco start",
     "build": "craco build",
+    "build:docs": "craco build && rm -rf ../docs && cp -r build ../docs",
     "test": "craco test",
     "predeploy": "yarn build",
     "deploy": "gh-pages -d build"
