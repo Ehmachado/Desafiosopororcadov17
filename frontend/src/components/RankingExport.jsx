@@ -37,8 +37,10 @@ const RankingExport = () => {
   const hasCarteirasData = realizadosCarteira.length > 0;
   const tema = THEME_VARIANTS[temaIndex];
 
-  const produtosRanking = [...produtos];
-  if (produtos.includes('Vida')) {
+  // Garantir que produtos seja um array
+  const produtosArray = Array.isArray(produtos) ? produtos : [];
+  const produtosRanking = [...produtosArray];
+  if (produtosArray.includes('Vida')) {
     const vidaIndex = produtosRanking.indexOf('Vida');
     produtosRanking[vidaIndex] = 'Vida Total';
   }
