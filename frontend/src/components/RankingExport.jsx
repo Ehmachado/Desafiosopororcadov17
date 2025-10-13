@@ -446,9 +446,6 @@ const RankingExport = () => {
                             {unidade === 'carteiras' && (
                               <td style={{ padding, fontSize, background: rowBgColor }}>{item.carteira}</td>
                             )}
-                            <td style={{ padding, fontSize, textAlign: 'right', fontWeight: '600', background: rowBgColor }}>
-                              {formatCurrency(item.orcado)}
-                            </td>
                             {(unidade === 'agencia' ? produtosRanking : ['Total']).map((produto, pIdx) => {
                               // Usa uma cor diferente para cada produto, com variação para linhas alternadas
                               const corProduto = produtoCores[pIdx % produtoCores.length];
@@ -456,6 +453,15 @@ const RankingExport = () => {
                               
                               return (
                                 <React.Fragment key={produto}>
+                                  <td style={{ 
+                                    padding, 
+                                    fontSize, 
+                                    textAlign: 'right',
+                                    fontWeight: '600',
+                                    background: bgProduto
+                                  }}>
+                                    {formatCurrency(item.orcadosPorProduto?.[produto] || 0)}
+                                  </td>
                                   <td style={{ 
                                     padding, 
                                     fontSize, 
