@@ -65,10 +65,16 @@ const ControleDiario = () => {
 
   // Busca o valor realizado do Campo 5 (sem dia especificado) para preencher automaticamente
   const getValorDoCampo5 = (prefixo, produto) => {
-    const realizadoSemDia = realizadosTipo.find(
+    // Busca realizados sem dia (vindos do Campo 5)
+    const realizados = realizadosTipo.filter(
       r => r.prefixo === prefixo && r.produto === produto && !r.dia
     );
-    return realizadoSemDia ? realizadoSemDia.valor : '';
+    
+    if (realizados.length === 0) return '';
+    
+    // Se houver múltiplos, retorna a soma (caso tenha sido salvo várias vezes)
+    const total = realizados.reduce((sum, r) => sum + (parseFloat(r.valor) || 0), 0);
+    return total;
   };
 
   return (
