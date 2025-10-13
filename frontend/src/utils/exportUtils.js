@@ -8,17 +8,25 @@ export const exportToPNG = async (elementId, filename = 'ranking.png') => {
   }
   
   try {
-    // Calcula a largura real do elemento (incluindo scroll)
-    const scrollWidth = element.scrollWidth;
-    const scrollHeight = element.scrollHeight;
+    // Força o elemento a ter o tamanho do conteúdo sem espaço extra
+    const originalOverflow = element.style.overflow;
+    element.style.overflow = 'visible';
+    
+    // Aguarda um momento para garantir que o DOM foi atualizado
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    // Usa getBoundingClientRect para obter o tamanho exato do conteúdo
+    const rect = element.getBoundingClientRect();
+    const width = Math.ceil(rect.width);
+    const height = Math.ceil(rect.height);
     
     // Ajusta scale baseado no tamanho do elemento
     let scale = 2;
-    if (scrollWidth > 2000) {
-      scale = 1.5; // Reduz scale para elementos muito largos
+    if (width > 2000) {
+      scale = 1.5;
     }
-    if (scrollWidth > 3000) {
-      scale = 1.2; // Reduz ainda mais para elementos extremamente largos
+    if (width > 3000) {
+      scale = 1.2;
     }
     
     const canvas = await html2canvas(element, {
@@ -26,21 +34,108 @@ export const exportToPNG = async (elementId, filename = 'ranking.png') => {
       backgroundColor: '#ffffff',
       logging: false,
       useCORS: true,
-      width: scrollWidth,
-      height: scrollHeight,
-      windowWidth: scrollWidth,
-      windowHeight: scrollHeight,
+      allowTaint: true,
+      width: width,
+      height: height,
+      windowWidth: width,
+      windowHeight: height,
       scrollX: 0,
-      scrollY: 0
+      scrollY: 0,
+      x: 0,
+      y: 0,
+      foreignObjectRendering: false
     });
+    
+    // Restaura o overflow original
+    element.style.overflow = originalOverflow;
+    
+    // Remove espaços em branco da imagem
+    const trimmedCanvas = trimCanvas(canvas);
     
     const link = document.createElement('a');
     link.download = filename;
-    link.href = canvas.toDataURL('image/png');
+    link.href = trimmedCanvas.toDataURL('image/png');
     link.click();
   } catch (error) {
     console.error('Error exporting to PNG:', error);
   }
+};
+
+// Função auxiliar para remover bordas brancas do canvas
+const trimCanvas = (canvas) => {
+  const ctx = canvas.getContext('2d');
+  const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const data = pixels.data;
+  
+  let top = 0, bottom = canvas.height, left = 0, right = canvas.width;
+  
+  // Encontrar top
+  for (let y = 0; y < canvas.height; y++) {
+    for (let x = 0; x < canvas.width; x++) {
+      const i = (y * canvas.width + x) * 4;
+      // Se não for branco (255, 255, 255) ou transparente
+      if (data[i] !== 255 || data[i + 1] !== 255 || data[i + 2] !== 255 || data[i + 3] !== 255) {
+        top = y;
+        y = canvas.height;
+        break;
+      }
+    }
+  }
+  
+  // Encontrar bottom
+  for (let y = canvas.height - 1; y >= 0; y--) {
+    for (let x = 0; x < canvas.width; x++) {
+      const i = (y * canvas.width + x) * 4;
+      if (data[i] !== 255 || data[i + 1] !== 255 || data[i + 2] !== 255 || data[i + 3] !== 255) {
+        bottom = y + 1;
+        y = -1;
+        break;
+      }
+    }
+  }
+  
+  // Encontrar left
+  for (let x = 0; x < canvas.width; x++) {
+    for (let y = 0; y < canvas.height; y++) {
+      const i = (y * canvas.width + x) * 4;
+      if (data[i] !== 255 || data[i + 1] !== 255 || data[i + 2] !== 255 || data[i + 3] !== 255) {
+        left = x;
+        x = canvas.width;
+        break;
+      }
+    }
+  }
+  
+  // Encontrar right
+  for (let x = canvas.width - 1; x >= 0; x--) {
+    for (let y = 0; y < canvas.height; y++) {
+      const i = (y * canvas.width + x) * 4;
+      if (data[i] !== 255 || data[i + 1] !== 255 || data[i + 2] !== 255 || data[i + 3] !== 255) {
+        right = x + 1;
+        x = -1;
+        break;
+      }
+    }
+  }
+  
+  const trimWidth = right - left;
+  const trimHeight = bottom - top;
+  
+  // Se não encontrou conteúdo, retorna o canvas original
+  if (trimWidth <= 0 || trimHeight <= 0) {
+    return canvas;
+  }
+  
+  // Cria novo canvas com tamanho cortado
+  const trimmedCanvas = document.createElement('canvas');
+  trimmedCanvas.width = trimWidth;
+  trimmedCanvas.height = trimHeight;
+  const trimmedCtx = trimmedCanvas.getContext('2d');
+  
+  // Copia a parte relevante
+  trimmedCtx.drawImage(canvas, left, top, trimWidth, trimHeight, 0, 0, trimWidth, trimHeight);
+  
+  return trimmedCanvas;
 };
 
 export const exportAllRedes = async (redesList, elementPrefix = 'ranking-rede-') => {
