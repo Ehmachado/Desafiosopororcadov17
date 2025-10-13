@@ -23,15 +23,18 @@ const OrcamentoConfig = () => {
 
   const tiposCarteira = [...new Set(carteiras.map(c => c.tipoCarteira).filter(Boolean))];
 
-  // Carregar valores salvos na inicialização
+  // Sincronizar com orcadosPorTipo quando houver mudanças (carregar valores salvos)
   useEffect(() => {
-    const existing = {};
-    orcadosPorTipo.forEach(o => {
-      const key = `${o.produto}-${o.tipoCarteira}`;
-      existing[key] = o.valor;
-    });
-    setTipoOrcamentos(existing);
-  }, []);
+    // Apenas sincronizar se tipoOrcamentos estiver vazio
+    if (Object.keys(tipoOrcamentos).length === 0 && orcadosPorTipo.length > 0) {
+      const existing = {};
+      orcadosPorTipo.forEach(o => {
+        const key = `${o.produto}-${o.tipoCarteira}`;
+        existing[key] = o.valor;
+      });
+      setTipoOrcamentos(existing);
+    }
+  }, [orcadosPorTipo]);
 
   // Adicionar chaves para novos produtos quando mudarem
   useEffect(() => {
