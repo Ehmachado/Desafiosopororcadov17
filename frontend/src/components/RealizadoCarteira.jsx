@@ -54,6 +54,54 @@ const RealizadoCarteira = () => {
     toast.success(`${previewData.length} realizados por carteira salvos!`);
   };
 
+  const handleSaveDiario = () => {
+    if (previewData.length === 0) {
+      toast.error('Nenhum dado para salvar');
+      return;
+    }
+
+    // Remove dados do mesmo dia antes de salvar
+    const updated = realizadosDiarios.filter(r => r.dia !== selectedDay);
+
+    const dailyData = previewData.map(item => ({
+      ...item,
+      dia: selectedDay
+    }));
+
+    setRealizadosDiarios([...updated, ...dailyData]);
+    setInputText('');
+    toast.success(`Realizado diário do Dia ${selectedDay} por carteira salvo!`);
+  };
+
+  const handleClearDiario = () => {
+    const updated = realizadosDiarios.filter(r => r.dia !== selectedDay);
+    setRealizadosDiarios(updated);
+    toast.success(`Dados do Dia ${selectedDay} por carteira removidos!`);
+  };
+
+  // Calcular acumulado total por carteira
+  const realizadoAcumulado = useMemo(() => {
+    const acumulado = [];
+    const porCarteira = {};
+
+    realizadosDiarios
+      .filter(r => r.dia <= selectedDay)
+      .forEach(r => {
+        const key = `${r.prefixo}_${r.carteira}_${r.tipoCarteira}`;
+        if (!porCarteira[key]) {
+          porCarteira[key] = {
+            prefixo: r.prefixo,
+            carteira: r.carteira,
+            tipoCarteira: r.tipoCarteira,
+            valor: 0
+          };
+        }
+        porCarteira[key].valor += r.valor;
+      });
+
+    return Object.values(porCarteira);
+  }, [realizadosDiarios, selectedDay]);
+
   return (
     <div className="bb-card">
       <div className="bb-card-header">
