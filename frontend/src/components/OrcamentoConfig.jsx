@@ -98,7 +98,7 @@ const OrcamentoConfig = () => {
       }
     });
     setOrcadosPorTipo(orcados);
-    toast.success('Orçamentos por tipo salvos!');
+    toast.success('Orçamentos por tipo salvos com sucesso!');
   };
 
   const handleSaveCarteira = () => {
