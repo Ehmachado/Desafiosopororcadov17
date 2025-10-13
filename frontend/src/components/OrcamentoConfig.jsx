@@ -22,6 +22,7 @@ const OrcamentoConfig = () => {
 
   const tiposCarteira = [...new Set(carteiras.map(c => c.tipoCarteira).filter(Boolean))];
 
+  // Carregar valores salvos na inicialização
   useEffect(() => {
     const existing = {};
     orcadosPorTipo.forEach(o => {
@@ -30,6 +31,24 @@ const OrcamentoConfig = () => {
     });
     setTipoOrcamentos(existing);
   }, []);
+
+  // Adicionar chaves para novos produtos quando mudarem
+  useEffect(() => {
+    if (produtos.length > 0 && tiposCarteira.length > 0) {
+      setTipoOrcamentos(prev => {
+        const updated = { ...prev };
+        produtos.forEach(produto => {
+          tiposCarteira.forEach(tipo => {
+            const key = `${produto}-${tipo}`;
+            if (!(key in updated)) {
+              updated[key] = 0;
+            }
+          });
+        });
+        return updated;
+      });
+    }
+  }, [produtos, tiposCarteira]);
 
   useEffect(() => {
     if (inputTextCarteira.trim()) {
