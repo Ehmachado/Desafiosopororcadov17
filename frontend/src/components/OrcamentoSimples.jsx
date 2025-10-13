@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 
 const OrcamentoSimples = () => {
   const [carteiras] = useLocalStorage('carteiras_master', []);
+  const [produtos] = useLocalStorage('challenge_produtos', []);
   const [orcamentoPorTipo, setOrcamentoPorTipo] = useLocalStorage('orcamento_por_tipo', {});
   
   // Estado local para inputs
@@ -19,18 +20,28 @@ const OrcamentoSimples = () => {
     setInputValues(orcamentoPorTipo);
   }, []);
 
-  // Calcular potencial por tipo (orçamento × quantidade de carteiras)
+  // Calcular potencial por tipo × produto
   const calcularPotencialPorTipo = () => {
     const potenciais = {};
+    
     tiposCarteira.forEach(tipo => {
       const qtdCarteiras = carteiras.filter(c => c.tipoCarteira === tipo).length;
-      const orcamento = orcamentoPorTipo[tipo] || 0;
-      potenciais[tipo] = {
-        qtdCarteiras,
-        orcamento,
-        potencial: orcamento * qtdCarteiras
-      };
+      
+      produtos.forEach(produto => {
+        const key = `${tipo}-${produto}`;
+        const orcamento = orcamentoPorTipo[key] || 0;
+        
+        const compositeKey = `${tipo}|${produto}`;
+        potenciais[compositeKey] = {
+          tipo,
+          produto,
+          qtdCarteiras,
+          orcamento,
+          potencial: orcamento * qtdCarteiras
+        };
+      });
     });
+    
     return potenciais;
   };
 
@@ -41,7 +52,59 @@ const OrcamentoSimples = () => {
     carteiras.forEach(carteira => {
       const prefixo = carteira.prefixo;
       const tipo = carteira.tipoCarteira;
-      const orcamento = orcamentoPorTipo[tipo] || 0;
+      
+      if (!orcamentosAgencia[prefixo]) {
+        orcamentosAgencia[prefixo] = {
+          prefixo,
+          agencia: carteira.agencia,
+          total: 0,
+          detalhes: []
+        };
+      }
+      
+      // Soma orçamento de todos os produtos para este tipo
+      produtos.forEach(produto => {
+        const key = `${tipo}-${produto}`;
+        const orcamento = orcamentoPorTipo[key] || 0;
+        orcamentosAgencia[prefixo].total += orcamento;
+        
+        if (orcamento > 0) {
+          orcamentosAgencia[prefixo].detalhes.push({
+            tipo,
+            produto,
+            orcamento
+          });
+        }
+      });
+    });
+    
+    return Object.values(orcamentosAgencia).sort((a, b) => a.prefixo.localeCompare(b.prefixo));
+  };
+
+  const handleInputChange = (tipo, produto, valor) => {
+    const key = `${tipo}-${produto}`;
+    setInputValues(prev => ({
+      ...prev,
+      [key]: parseNumericValue(valor)
+    }));
+  };
+
+  const handleSalvar = () => {
+    setOrcamentoPorTipo(inputValues);
+    toast.success('Orçamentos salvos com sucesso!');
+  };
+
+  const handleLimpar = () => {
+    if (window.confirm('Tem certeza que deseja limpar todos os dados de orçamento?')) {
+      setInputValues({});
+      setOrcamentoPorTipo({});
+      toast.success('Dados limpos com sucesso!');
+    }
+  };
+
+  const potenciais = calcularPotencialPorTipo();
+  const orcamentosAgencia = calcularOrcamentoPorAgencia();
+  const potencialTotal = Object.values(potenciais).reduce((sum, p) => sum + p.potencial, 0);
       
       if (!orcamentosAgencia[prefixo]) {
         orcamentosAgencia[prefixo] = {
