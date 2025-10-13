@@ -22,30 +22,39 @@ const OrcamentoConfig = () => {
 
   const tiposCarteira = [...new Set(carteiras.map(c => c.tipoCarteira).filter(Boolean))];
 
-  // Inicializar e manter tipoOrcamentos sincronizado
+  // Carregar valores salvos apenas na inicialização
+  useEffect(() => {
+    const updated = {};
+    
+    // Carrega valores existentes de orcadosPorTipo
+    orcadosPorTipo.forEach(o => {
+      const key = `${o.produto}-${o.tipoCarteira}`;
+      updated[key] = o.valor;
+    });
+    
+    setTipoOrcamentos(updated);
+  }, []);
+
+  // Adicionar chaves para novos produtos quando produtos ou tipos mudarem
   useEffect(() => {
     if (produtos.length > 0 && tiposCarteira.length > 0) {
-      const updated = {};
-      
-      // Primeiro, carrega valores existentes de orcadosPorTipo
-      orcadosPorTipo.forEach(o => {
-        const key = `${o.produto}-${o.tipoCarteira}`;
-        updated[key] = o.valor;
-      });
-      
-      // Depois, garante que TODOS os produtos (inclusive novos) têm chaves
-      produtos.forEach(produto => {
-        tiposCarteira.forEach(tipo => {
-          const key = `${produto}-${tipo}`;
-          if (!(key in updated)) {
-            updated[key] = 0;
-          }
+      setTipoOrcamentos(prev => {
+        const updated = { ...prev };
+        
+        // Garante que TODOS os produtos têm chaves
+        produtos.forEach(produto => {
+          tiposCarteira.forEach(tipo => {
+            const key = `${produto}-${tipo}`;
+            if (!(key in updated)) {
+              updated[key] = 0;
+            }
+          });
         });
+        
+        return updated;
       });
-      
-      setTipoOrcamentos(updated);
     }
-  }, [produtos, tiposCarteira, orcadosPorTipo]);
+  }, [produtos, tiposCarteira]);
 
   useEffect(() => {
     if (inputTextCarteira.trim()) {
