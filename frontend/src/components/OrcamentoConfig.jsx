@@ -23,12 +23,6 @@ const OrcamentoConfig = () => {
 
   const tiposCarteira = [...new Set(carteiras.map(c => c.tipoCarteira).filter(Boolean))];
 
-  // Debug: log quando carteiras mudar
-  useEffect(() => {
-    console.log('[OrcamentoConfig] Carteiras atualizadas:', carteiras.length, 'carteiras');
-    console.log('[OrcamentoConfig] Tipos detectados:', tiposCarteira);
-  }, [carteiras, tiposCarteira]);
-
   // Sincronizar com orcadosPorTipo quando houver mudanças (carregar valores salvos)
   useEffect(() => {
     if (orcadosPorTipo.length > 0) {
