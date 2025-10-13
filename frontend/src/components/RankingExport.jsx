@@ -93,7 +93,29 @@ const RankingExport = () => {
         const valores = {};
 
         produtosRanking.forEach(produto => {
-          const realizado = calculateRealizadoPorAgencia(prefixo, produto, realizadosTipo, diaFiltro);
+          // Usa realizadosDiarios se houver dados, senão usa realizadosTipo
+          let realizado = 0;
+          if (realizadosDiarios.length > 0) {
+            // Soma todos os dias salvos para este prefixo e produto
+            realizado = realizadosDiarios
+              .filter(r => r.tipo === 'tipo' && r.prefixo === prefixo && r.produto === produto)
+              .reduce((sum, r) => sum + (parseFloat(r.valor) || 0), 0);
+            
+            // Se for Vida Total, soma Vida + Vidinha
+            if (produto === 'Vida Total') {
+              const vida = realizadosDiarios
+                .filter(r => r.tipo === 'tipo' && r.prefixo === prefixo && r.produto === 'Vida')
+                .reduce((sum, r) => sum + (parseFloat(r.valor) || 0), 0);
+              const vidinha = realizadosDiarios
+                .filter(r => r.tipo === 'tipo' && r.prefixo === prefixo && r.produto === 'Vidinha')
+                .reduce((sum, r) => sum + (parseFloat(r.valor) || 0), 0);
+              realizado = vida + vidinha;
+            }
+          } else {
+            // Fallback para realizadosTipo (compatibilidade)
+            realizado = calculateRealizadoPorAgencia(prefixo, produto, realizadosTipo, diaFiltro);
+          }
+          
           valores[produto] = realizado;
           atingimentos[produto] = calculateAtingimento(realizado, orcado);
         });
