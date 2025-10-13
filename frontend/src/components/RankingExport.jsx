@@ -393,7 +393,6 @@ const RankingExport = () => {
                         {unidade === 'carteiras' && (
                           <th style={{ padding, textAlign: 'left', fontSize, fontWeight: '600', position: 'sticky', top: 0, background: 'var(--bb-blue)', whiteSpace: 'nowrap' }}>Carteira</th>
                         )}
-                        <th style={{ padding, textAlign: 'right', fontSize, fontWeight: '600', position: 'sticky', top: 0, background: 'var(--bb-blue)', whiteSpace: 'nowrap' }}>Orçado</th>
                         {(unidade === 'agencia' ? produtosRanking : ['Total']).map((produto, pIdx) => {
                           // Cores mais escuras para os cabeçalhos dos produtos
                           const headerCores = [
@@ -410,7 +409,10 @@ const RankingExport = () => {
                           return (
                             <React.Fragment key={produto}>
                               <th style={{ padding, textAlign: 'right', fontSize, fontWeight: '600', position: 'sticky', top: 0, background: headerBg, whiteSpace: 'nowrap' }}>
-                                {produto}<br/>Valor
+                                {produto}<br/>Orçado
+                              </th>
+                              <th style={{ padding, textAlign: 'right', fontSize, fontWeight: '600', position: 'sticky', top: 0, background: headerBg, whiteSpace: 'nowrap' }}>
+                                {produto}<br/>Realizado
                               </th>
                               <th style={{ padding, textAlign: 'right', fontSize, fontWeight: '600', position: 'sticky', top: 0, background: headerBg, whiteSpace: 'nowrap' }}>
                                 {produto}<br/>%
