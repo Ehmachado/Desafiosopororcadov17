@@ -3,7 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Settings, Database, TrendingUp, BarChart3, FileDown } from 'lucide-react';
 import ChallengeConfig from '../components/ChallengeConfig';
 import CarteirasMaster from '../components/CarteirasMaster';
-import OrcamentoConfig from '../components/OrcamentoConfig';
+import OrcamentoConfigNovo from '../components/OrcamentoConfigNovo';
 import RedesConfig from '../components/RedesConfig';
 import RealizadoTipo from '../components/RealizadoTipo';
 import RealizadoCarteira from '../components/RealizadoCarteira';
