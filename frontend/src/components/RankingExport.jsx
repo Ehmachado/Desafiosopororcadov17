@@ -23,7 +23,8 @@ const RankingExport = () => {
   const [redes] = useLocalStorage('redes', []);
   const [realizadosTipo] = useLocalStorage('realizados_tipo', []);
   const [realizadosCarteira] = useLocalStorage('realizados_carteira', []);
-  const [realizadosDiarios] = useLocalStorage('realizados_diarios', []);
+  const [realizadosDiariosTipo] = useLocalStorage('realizados_tipo_diarios', []);
+  const [realizadosDiariosCarteira] = useLocalStorage('realizados_carteira_diarios', []);
   const [diasDesafio] = useLocalStorage('challenge_dias', 30);
 
   const [unidade, setUnidade] = useState('agencia');
