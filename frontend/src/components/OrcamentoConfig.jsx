@@ -38,7 +38,7 @@ const OrcamentoConfig = () => {
         return updated;
       });
     }
-  }, [orcadosPorTipo, setTipoOrcamentos]);
+  }, [orcadosPorTipo]);
 
   // Adicionar chaves para novos produtos quando mudarem
   useEffect(() => {
