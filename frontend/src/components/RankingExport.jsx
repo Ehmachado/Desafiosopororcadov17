@@ -293,7 +293,13 @@ const RankingExport = () => {
 
       {/* Área de Exportação */}
       {rankingData.length > 0 && (
-        <div id="ranking-export-all" className="export-container" style={{ background: 'white', padding: '40px', borderRadius: '12px' }}>
+        <div id="ranking-export-all" className="export-container" style={{ 
+          background: 'white', 
+          padding: numProdutos > 5 ? '20px' : '40px', 
+          borderRadius: '12px',
+          width: 'fit-content',
+          minWidth: '100%'
+        }}>
           {redesUnicas.map(rede => {
             const dadosRede = redesAgrupadas[rede] || [];
             if (dadosRede.length === 0) return null;
