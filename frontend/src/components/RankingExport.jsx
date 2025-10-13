@@ -18,7 +18,7 @@ import { toast } from 'sonner';
 const RankingExport = () => {
   const [produtos] = useLocalStorage('challenge_produtos', []);
   const [carteiras] = useLocalStorage('carteiras_master', []);
-  const [orcadosPorTipo] = useLocalStorage('orcados_por_tipo', []);
+  const [orcadosPorTipo] = useLocalStorage('orcamento_por_tipo', {}); // NOVO FORMATO
   const [orcadosPorCarteira] = useLocalStorage('orcados_por_carteira', []);
   const [redes] = useLocalStorage('redes', []);
   const [realizadosTipo] = useLocalStorage('realizados_tipo', []);
