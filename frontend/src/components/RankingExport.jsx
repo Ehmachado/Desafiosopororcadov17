@@ -335,16 +335,48 @@ const RankingExport = () => {
 
           <div>
             <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: 'var(--bb-gray-700)', fontSize: '14px' }}>
-              Símbolo da Super:
+              Logotipo da Super:
             </label>
-            <input
-              type="text"
-              value={simboloSuper}
-              onChange={(e) => setSimboloSuper(e.target.value)}
-              className="bb-input"
-              placeholder="Ex: SR-SUL"
-              data-testid="simbolo-super-input"
-            />
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              {simboloSuper ? (
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flex: 1 }}>
+                  <img 
+                    src={simboloSuper} 
+                    alt="Logo Super" 
+                    style={{ 
+                      height: '50px', 
+                      width: 'auto', 
+                      maxWidth: '150px',
+                      objectFit: 'contain',
+                      border: '1px solid #ddd',
+                      borderRadius: '4px',
+                      padding: '4px',
+                      background: 'white'
+                    }} 
+                  />
+                  <button
+                    onClick={handleRemoveImage}
+                    className="bb-btn"
+                    style={{ background: '#dc3545', color: 'white', padding: '6px 12px' }}
+                    type="button"
+                  >
+                    Remover
+                  </button>
+                </div>
+              ) : (
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="bb-input"
+                  data-testid="simbolo-super-input"
+                  style={{ flex: 1 }}
+                />
+              )}
+            </div>
+            <p style={{ fontSize: '12px', color: '#6c757d', marginTop: '4px' }}>
+              Recomendado: imagem quadrada ou horizontal, máximo 2MB
+            </p>
           </div>
 
           <div>
