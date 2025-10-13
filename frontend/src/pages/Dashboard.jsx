@@ -102,10 +102,7 @@ const Dashboard = () => {
           </TabsContent>
 
           <TabsContent value="orcamento" className="fade-in">
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-              <OrcamentoTipo />
-              <PotencialSeguridade />
-            </div>
+            <OrcamentoConfig />
           </TabsContent>
 
           <TabsContent value="redes" className="fade-in">
