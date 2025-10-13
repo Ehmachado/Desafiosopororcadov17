@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 
 export const useLocalStorage = (key, initialValue) => {
-  const readValue = useCallback(() => {
+  const [storedValue, setStoredValue] = useState(() => {
     try {
       const item = window.localStorage.getItem(key);
       return item ? JSON.parse(item) : initialValue;
@@ -9,11 +9,9 @@ export const useLocalStorage = (key, initialValue) => {
       console.error(`Error reading localStorage key "${key}":`, error);
       return initialValue;
     }
-  }, [key, initialValue]);
+  });
 
-  const [storedValue, setStoredValue] = useState(readValue);
-
-  const setValue = useCallback((value) => {
+  const setValue = (value) => {
     try {
       const valueToStore = value instanceof Function ? value(storedValue) : value;
       setStoredValue(valueToStore);
@@ -21,12 +19,7 @@ export const useLocalStorage = (key, initialValue) => {
     } catch (error) {
       console.error(`Error setting localStorage key "${key}":`, error);
     }
-  }, [key, storedValue]);
-
-  // Re-sync from localStorage when component mounts or key changes
-  useEffect(() => {
-    setStoredValue(readValue());
-  }, [readValue]);
+  };
 
   return [storedValue, setValue];
 };
