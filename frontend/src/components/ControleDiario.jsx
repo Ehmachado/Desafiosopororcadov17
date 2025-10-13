@@ -138,11 +138,14 @@ const ControleDiario = () => {
                         <td style={{ fontWeight: 600 }}>{prefixo}</td>
                         {produtosComVidinha.map(produto => {
                           const key = `${prefixo}-${produto}`;
+                          const valorCampo5 = getValorDoCampo5(prefixo, produto);
+                          const valorExibir = valoresDia[key] !== undefined ? valoresDia[key] : valorCampo5;
+                          
                           return (
                             <td key={produto}>
                               <input
                                 type="number"
-                                value={valoresDia[key] || ''}
+                                value={valorExibir}
                                 onChange={(e) => setValoresDia(prev => ({
                                   ...prev,
                                   [key]: e.target.value
@@ -151,6 +154,7 @@ const ControleDiario = () => {
                                 placeholder="0.00"
                                 step="0.01"
                                 style={{ minWidth: '120px' }}
+                                title={valorCampo5 ? `Valor do Campo 5: ${valorCampo5}` : 'Nenhum valor no Campo 5'}
                               />
                             </td>
                           );
