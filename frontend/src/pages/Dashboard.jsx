@@ -102,7 +102,7 @@ const Dashboard = () => {
           </TabsContent>
 
           <TabsContent value="orcamento" className="fade-in">
-            <OrcamentoConfig />
+            <OrcamentoConfigNovo />
           </TabsContent>
 
           <TabsContent value="redes" className="fade-in">
