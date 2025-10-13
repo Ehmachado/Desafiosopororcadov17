@@ -663,7 +663,6 @@ const RankingExport = () => {
                         
                         return (
                           <tr key={idx} style={{ borderBottom: '1px solid #e8eef7', background: rowBgColor }}>
-                            <td style={{ padding, fontSize, fontWeight: '600', background: rowBgColor }}>{idx + 1}º</td>
                             <td style={{ padding, fontSize, background: rowBgColor }}>{item.prefixo}</td>
                             <td style={{ padding, fontSize, background: rowBgColor }}>{item.agencia}</td>
                             {unidade === 'carteiras' && (
