@@ -9,6 +9,7 @@ import RealizadoTipo from '../components/RealizadoTipo';
 import RealizadoCarteira from '../components/RealizadoCarteira';
 import RankingExport from '../components/RankingExport';
 import BackupManager from '../components/BackupManager';
+import ResetManager from '../components/ResetManager';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('config');
