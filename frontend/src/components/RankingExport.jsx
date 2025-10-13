@@ -611,7 +611,6 @@ const RankingExport = () => {
                   <table style={{ width: '100%', borderCollapse: 'collapse', background: 'white', fontSize }}>
                     <thead>
                       <tr style={{ background: 'var(--bb-blue)', color: 'white' }}>
-                        <th style={{ padding, textAlign: 'left', fontSize, fontWeight: '600', position: 'sticky', top: 0, background: 'var(--bb-blue)', whiteSpace: 'nowrap' }}>Pos.</th>
                         <th style={{ padding, textAlign: 'left', fontSize, fontWeight: '600', position: 'sticky', top: 0, background: 'var(--bb-blue)', whiteSpace: 'nowrap' }}>Prefixo</th>
                         <th style={{ padding, textAlign: 'left', fontSize, fontWeight: '600', position: 'sticky', top: 0, background: 'var(--bb-blue)', whiteSpace: 'nowrap' }}>Dependência</th>
                         {unidade === 'carteiras' && (
