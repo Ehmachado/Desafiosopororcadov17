@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { Calendar, Save } from 'lucide-react';
 import { formatCurrency } from '../utils/dataParser';
