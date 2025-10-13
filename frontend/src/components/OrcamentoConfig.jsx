@@ -48,6 +48,7 @@ const OrcamentoConfig = () => {
 
   // Adicionar chaves para novos produtos quando mudarem
   useEffect(() => {
+    console.log('[OrcamentoConfig] useEffect produtos/tipos:', { produtos: produtos.length, tipos: tiposCarteira.length });
     if (produtos.length > 0 && tiposCarteira.length > 0) {
       setTipoOrcamentos(prev => {
         const updated = { ...prev };
@@ -59,10 +60,11 @@ const OrcamentoConfig = () => {
             }
           });
         });
+        console.log('[OrcamentoConfig] Inicializando tipoOrcamentos:', Object.keys(updated).length, 'chaves');
         return updated;
       });
     }
-  }, [produtos, tiposCarteira]);
+  }, [produtos, tiposCarteira, carteiras, setTipoOrcamentos]); // Adicionar carteiras como dependência
 
   useEffect(() => {
     if (inputTextCarteira.trim()) {
