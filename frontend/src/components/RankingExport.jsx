@@ -146,11 +146,12 @@ const RankingExport = () => {
           // Mapear "Vida Total" para "Vida" nos orçamentos
           const produtoBusca = produto === 'Vida Total' ? 'Vida' : produto;
           
-          // NOVO FORMATO: orcadosPorTipo é um objeto { tipoCarteira: valor }
+          // NOVO FORMATO: orcadosPorTipo é um objeto { "tipo-produto": valor }
           if (typeof orcadosPorTipo === 'object' && !Array.isArray(orcadosPorTipo)) {
-            // Para cada tipo de carteira, multiplicar orçado × quantidade
+            // Para cada tipo de carteira, buscar orçado específico para este produto
             Object.entries(tiposCount).forEach(([tipo, qtd]) => {
-              const orcadoTipo = orcadosPorTipo[tipo] || 0;
+              const key = `${tipo}-${produtoBusca}`;
+              const orcadoTipo = orcadosPorTipo[key] || 0;
               orcadoProduto += (parseFloat(orcadoTipo) || 0) * qtd;
             });
           } else {
