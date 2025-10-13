@@ -29,7 +29,26 @@ const OrcamentoConfig = () => {
       existing[key] = o.valor;
     });
     setTipoOrcamentos(existing);
-  }, []);
+  }, [orcadosPorTipo]);
+
+  // Atualizar tipoOrcamentos quando produtos mudarem
+  useEffect(() => {
+    if (produtos.length > 0 && tiposCarteira.length > 0) {
+      setTipoOrcamentos(prev => {
+        const updated = { ...prev };
+        // Adicionar chaves para novos produtos se não existirem
+        produtos.forEach(produto => {
+          tiposCarteira.forEach(tipo => {
+            const key = `${produto}-${tipo}`;
+            if (!(key in updated)) {
+              updated[key] = 0;
+            }
+          });
+        });
+        return updated;
+      });
+    }
+  }, [produtos, tiposCarteira]);
 
   useEffect(() => {
     if (inputTextCarteira.trim()) {
