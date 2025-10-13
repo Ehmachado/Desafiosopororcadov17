@@ -8,11 +8,30 @@ export const exportToPNG = async (elementId, filename = 'ranking.png') => {
   }
   
   try {
+    // Calcula a largura real do elemento (incluindo scroll)
+    const scrollWidth = element.scrollWidth;
+    const scrollHeight = element.scrollHeight;
+    
+    // Ajusta scale baseado no tamanho do elemento
+    let scale = 2;
+    if (scrollWidth > 2000) {
+      scale = 1.5; // Reduz scale para elementos muito largos
+    }
+    if (scrollWidth > 3000) {
+      scale = 1.2; // Reduz ainda mais para elementos extremamente largos
+    }
+    
     const canvas = await html2canvas(element, {
-      scale: 2,
+      scale: scale,
       backgroundColor: '#ffffff',
       logging: false,
-      useCORS: true
+      useCORS: true,
+      width: scrollWidth,
+      height: scrollHeight,
+      windowWidth: scrollWidth,
+      windowHeight: scrollHeight,
+      scrollX: 0,
+      scrollY: 0
     });
     
     const link = document.createElement('a');
