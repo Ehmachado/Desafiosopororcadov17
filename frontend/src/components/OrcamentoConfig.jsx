@@ -14,7 +14,8 @@ const OrcamentoConfig = () => {
   const [orcadosPorCarteira, setOrcadosPorCarteira] = useLocalStorage('orcados_por_carteira', []);
   const [metaPercentual, setMetaPercentual] = useLocalStorage('meta_percentual', 100);
   
-  const [tipoOrcamentos, setTipoOrcamentos] = useState({});
+  // Usar localStorage para auto-save dos valores digitados
+  const [tipoOrcamentos, setTipoOrcamentos] = useLocalStorage('tipo_orcamentos_temp', {});
   const [inputTextCarteira, setInputTextCarteira] = useState('');
   const [parsedRowsCarteira, setParsedRowsCarteira] = useState([]);
   const [columnMappingCarteira, setColumnMappingCarteira] = useState({});
