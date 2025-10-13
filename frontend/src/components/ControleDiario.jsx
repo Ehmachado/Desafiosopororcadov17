@@ -55,8 +55,35 @@ const ControleDiario = () => {
     realizadosTipo: realizadosTipo.length,
     prefixosDeCarteiras,
     prefixosDeRealizados,
-    prefixosUnicos
+    prefixosUnicos,
+    realizadosTipo: realizadosTipo
   });
+
+  // Popula automaticamente os valores do Campo 5 quando o componente carrega ou muda de dia
+  React.useEffect(() => {
+    if (!valoresInicializados && prefixosUnicos.length > 0 && produtosComVidinha.length > 0) {
+      const valoresIniciais = {};
+      
+      prefixosUnicos.forEach(prefixo => {
+        produtosComVidinha.forEach(produto => {
+          const valorCampo5 = getValorDoCampo5(prefixo, produto);
+          if (valorCampo5) {
+            const key = `${prefixo}-${produto}`;
+            valoresIniciais[key] = valorCampo5;
+          }
+        });
+      });
+      
+      console.log('Valores inicializados do Campo 5:', valoresIniciais);
+      setValoresDia(valoresIniciais);
+      setValoresInicializados(true);
+    }
+  }, [prefixosUnicos, produtosComVidinha, valoresInicializados]);
+
+  // Reinicializa quando muda o dia
+  React.useEffect(() => {
+    setValoresInicializados(false);
+  }, [diaAtual]);
 
   const getRealizadoAcumulado = (prefixo, produto, ateDia) => {
     return realizadosTipo
