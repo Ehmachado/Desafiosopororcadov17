@@ -69,8 +69,8 @@ const OrcamentoPorCarteira = () => {
       agencia: '',
       carteira: '',
       tipoCarteira: '',
-      orcado: {},
-      realizado: {}
+      orcado: '',
+      realizado: ''
     };
 
     headerLine.forEach((header, idx) => {
@@ -87,35 +87,27 @@ const OrcamentoPorCarteira = () => {
         autoMapping.agencia = idx.toString();
       }
       // Carteira
-      if (headerLower.includes('carteira')) {
+      if (headerLower.includes('carteira') && !headerLower.includes('tipo')) {
         autoMapping.carteira = idx.toString();
       }
       // Tipo de Carteira
       if (headerLower.includes('tipo') && headerLower.includes('carteira')) {
         autoMapping.tipoCarteira = idx.toString();
       }
-      
-      // Orçado e Realizado por produto
-      produtosArray.forEach(produto => {
-        const produtoLower = produto.toLowerCase();
-        
-        // Orçado
-        if ((headerLower.includes('orçado') || headerLower.includes('orcado') || 
-             headerLower.includes('conexão') || headerLower.includes('conexao')) && 
-            headerLower.includes(produtoLower)) {
-          autoMapping.orcado[produto] = idx.toString();
-        }
-        
-        // Realizado
-        if (headerLower.includes('realizado') && headerLower.includes(produtoLower)) {
-          autoMapping.realizado[produto] = idx.toString();
-        }
-      });
+      // Orçado
+      if (headerLower.includes('orçado') || headerLower.includes('orcado') || 
+          headerLower.includes('conexão') || headerLower.includes('conexao')) {
+        if (!autoMapping.orcado) autoMapping.orcado = idx.toString();
+      }
+      // Realizado
+      if (headerLower.includes('realizado')) {
+        if (!autoMapping.realizado) autoMapping.realizado = idx.toString();
+      }
     });
 
     setColumnMapping(autoMapping);
     toast.success(`${rows.length} linhas carregadas com sucesso!`);
-  }, [pastedData, produtosArray]);
+  }, [pastedData]);
 
   // Função para processar e salvar os dados mapeados
   const handleSalvarDados = useCallback(() => {
