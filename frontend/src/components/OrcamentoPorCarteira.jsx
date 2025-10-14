@@ -210,42 +210,61 @@ const OrcamentoPorCarteira = () => {
       <div className="bb-card">
         <div className="bb-card-header">
           <h2 className="bb-card-title">Campo 3.1 — Orçamento Por % Atingimento (por Carteira/Agência)</h2>
-          <p className="bb-card-subtitle">Cole planilha com orçamento por carteira e defina % de meta</p>
+          <p className="bb-card-subtitle">Cole planilha com orçamento e realizado por carteira | Suporta até 1000 linhas</p>
         </div>
+
+        {/* Loading indicator */}
+        {isProcessing && (
+          <div style={{ padding: '12px', background: '#fff3cd', borderRadius: '8px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <AlertCircle size={16} />
+            Processando dados... Aguarde.
+          </div>
+        )}
 
         {/* Textarea para colar dados */}
         <div style={{ marginBottom: '24px' }}>
           <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, fontSize: '14px' }}>
-            Cole os dados da planilha (Tab/CSV):
+            Cole os dados da planilha (Tab separado):
           </label>
           <textarea
             value={rawData}
             onChange={(e) => setRawData(e.target.value)}
             className="bb-input"
-            placeholder="Cole aqui os dados: Prefixo  Agência  Carteira  Tipo  Orçado"
-            rows={8}
+            placeholder="Prefixo  Agência  Carteira  Tipo  Orçado  Realizado"
+            rows={6}
             style={{ fontFamily: 'monospace', fontSize: '12px' }}
             data-testid="orcamento-carteira-textarea"
+            disabled={isProcessing}
           />
+          <p style={{ fontSize: '12px', color: '#6c757d', marginTop: '4px' }}>
+            {parsedRows.length > 0 && `${parsedRows.length - 1} linhas detectadas (${parsedRows.length > 1000 ? 'limitado a 1000' : 'ok'})`}
+          </p>
         </div>
 
-        {/* Column Mapper */}
-        {showMapper && parsedRows.length > 0 && (
-          <ColumnMapper
-            parsedRows={parsedRows}
-            columnMapping={columnMapping}
-            setColumnMapping={setColumnMapping}
-            requiredFields={requiredFields}
-          />
-        )}
-
-        {/* Data Preview */}
-        {parsedRows.length > 0 && Object.keys(columnMapping).length > 0 && (
-          <DataPreview
-            parsedRows={parsedRows}
-            columnMapping={columnMapping}
-            requiredFields={requiredFields}
-          />
+        {/* Mapeamento de colunas simplificado */}
+        {parsedRows.length > 0 && (
+          <div style={{ marginBottom: '24px', padding: '16px', background: '#f8f9fa', borderRadius: '8px' }}>
+            <h3 style={{ fontSize: '14px', fontWeight: 600, marginBottom: '12px' }}>Mapeamento de Colunas:</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
+              {requiredFields.map(field => (
+                <div key={field.id}>
+                  <label style={{ fontSize: '12px', display: 'block', marginBottom: '4px' }}>{field.label}:</label>
+                  <select
+                    value={columnMapping[field.id] !== undefined ? columnMapping[field.id] : ''}
+                    onChange={(e) => setColumnMapping(prev => ({ ...prev, [field.id]: parseInt(e.target.value) }))}
+                    className="bb-input"
+                    style={{ fontSize: '12px' }}
+                  >
+                    <option value="">Selecione...</option>
+                    {parsedRows[0]?.map((col, idx) => (
+                      <option key={idx} value={idx}>Col {idx + 1}: {col.substring(0, 20)}</option>
+                    ))}
+                  </select>
+                  {field.mapped && <span style={{ fontSize: '11px', color: 'green' }}>✓</span>}
+                </div>
+              ))}
+            </div>
+          </div>
         )}
 
         {/* % Meta do Desafio */}
@@ -270,22 +289,22 @@ const OrcamentoPorCarteira = () => {
               className="bb-input"
               min="0"
               max="200"
-              style={{ width: '100px' }}
+              style={{ width: '80px' }}
             />
-            <span style={{ fontWeight: 600, fontSize: '18px', minWidth: '60px' }}>{fatorMeta}%</span>
+            <span style={{ fontWeight: 600, fontSize: '18px', minWidth: '50px' }}>{fatorMeta}%</span>
           </div>
           <p style={{ fontSize: '12px', color: '#6c757d', marginTop: '8px' }}>
-            Meta efetiva = Orçado × {fatorMeta}%
+            Fórmula: (Orçado × {fatorMeta}%) - Realizado = Orçado Efetivo
           </p>
         </div>
 
         {/* Botões */}
         <div style={{ display: 'flex', gap: '12px' }}>
-          <button onClick={handleSave} className="bb-btn bb-btn-primary" data-testid="save-orcamento-carteira-btn">
+          <button onClick={handleSave} className="bb-btn bb-btn-primary" disabled={isProcessing} data-testid="save-orcamento-carteira-btn">
             <Save size={16} />
-            Salvar Orçamentos
+            {isProcessing ? 'Processando...' : 'Salvar Orçamentos'}
           </button>
-          <button onClick={handleClear} className="bb-btn" style={{ background: '#dc3545', color: 'white' }}>
+          <button onClick={handleClear} className="bb-btn" style={{ background: '#dc3545', color: 'white' }} disabled={isProcessing}>
             <Trash2 size={16} />
             Limpar Dados
           </button>
@@ -357,11 +376,11 @@ const OrcamentoPorCarteira = () => {
                 </tr>
               </thead>
               <tbody>
-                {orcamentosAgencia.map(agencia => (
+                {orcamentosAgencia.slice(0, 100).map(agencia => (
                   <tr key={agencia.prefixo}>
                     <td style={{ fontWeight: 600 }}>{agencia.prefixo}</td>
                     <td>{agencia.agencia}</td>
-                    <td>{agencia.carteiras.length}</td>
+                    <td>{agencia.qtdCarteiras}</td>
                     <td>{formatCurrency(agencia.totalOrcadoBruto)}</td>
                     <td>{formatCurrency(agencia.totalRealizado)}</td>
                     <td style={{ fontWeight: 600, color: 'var(--bb-blue)' }}>
@@ -371,6 +390,11 @@ const OrcamentoPorCarteira = () => {
                 ))}
               </tbody>
             </table>
+            {orcamentosAgencia.length > 100 && (
+              <p style={{ fontSize: '12px', color: '#6c757d', marginTop: '8px', textAlign: 'center' }}>
+                Mostrando primeiras 100 agências de {orcamentosAgencia.length} total
+              </p>
+            )}
           </div>
         </div>
       )}
