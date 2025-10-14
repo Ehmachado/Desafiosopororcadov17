@@ -281,7 +281,7 @@ const OrcamentoPorCarteira = () => {
               <textarea
                 value={pastedData}
                 onChange={(e) => setPastedData(e.target.value)}
-                placeholder="Cole aqui os dados copiados do Excel/Sheets...&#10;Exemplo:&#10;Prefixo	Agência	Carteira	Tipo	Orçado Vida	Realizado Vida	Orçado Prestamista	Realizado Prestamista&#10;0001	Agência Central	001	Pessoa Física	5000	3000	8000	6000"
+                placeholder="Cole aqui os dados copiados do Excel/Sheets...&#10;Exemplo:&#10;Prefixo	Agência	Carteira	Tipo Carteira	Orçado	Realizado&#10;0001	Agência Central	001	Pessoa Física	50000	30000&#10;0001	Agência Central	002	Pessoa Jurídica	80000	45000"
                 className="bb-input"
                 style={{ 
                   minHeight: '120px', 
