@@ -3,46 +3,71 @@ import { parseNumericValue } from './dataParser';
 export const calculateOrcadoPorAgencia = (prefixo, carteiras, orcadosPorTipo, orcadosPorCarteira, useCarteiraBase) => {
   if (!prefixo) return 0;
   
-  // Debug: verificar dados recebidos
-  const hasOrcadosPorTipo = orcadosPorTipo && 
-    ((typeof orcadosPorTipo === 'object' && Object.keys(orcadosPorTipo).length > 0) ||
-     (Array.isArray(orcadosPorTipo) && orcadosPorTipo.length > 0));
+  // Verificar se Campo 3 (orcamento_por_tipo) tem ALGUM dado
+  let hasCampo3Data = false;
+  if (orcadosPorTipo) {
+    if (typeof orcadosPorTipo === 'object' && !Array.isArray(orcadosPorTipo)) {
+      // É um objeto - verificar se tem chaves com valores > 0
+      hasCampo3Data = Object.values(orcadosPorTipo).some(val => parseNumericValue(val) > 0);
+    } else if (Array.isArray(orcadosPorTipo)) {
+      // É um array - verificar se tem items
+      hasCampo3Data = orcadosPorTipo.length > 0;
+    }
+  }
   
-  const hasOrcadosPorCarteira = orcadosPorCarteira && orcadosPorCarteira.length > 0;
+  // Verificar se Campo 3.1 (orcados_por_carteira) tem dados
+  const hasCampo31Data = orcadosPorCarteira && orcadosPorCarteira.length > 0;
   
-  console.log('calculateOrcadoPorAgencia DEBUG:', {
+  console.log('🔍 calculateOrcadoPorAgencia:', {
     prefixo,
-    hasOrcadosPorTipo,
-    hasOrcadosPorCarteira,
+    hasCampo3Data,
+    hasCampo31Data,
     useCarteiraBase,
+    orcadosPorTipoType: typeof orcadosPorTipo,
     orcadosPorTipoKeys: typeof orcadosPorTipo === 'object' ? Object.keys(orcadosPorTipo).length : 0,
     orcadosPorCarteiraLength: orcadosPorCarteira?.length || 0
   });
   
-  // PRIORIDADE 1: Se usuário forçou usar carteira OU se Campo 3 está vazio
-  if ((useCarteiraBase || !hasOrcadosPorTipo) && hasOrcadosPorCarteira) {
-    console.log('Usando CAMPO 3.1 (Orçamento por Carteira)');
-    const orcados = orcadosPorCarteira.filter(o => o.prefixo === prefixo);
-    const total = orcados.reduce((sum, o) => {
-      // Usar orcadoEfetivo se existir
-      if (o.orcadoEfetivo !== undefined) {
-        return sum + parseNumericValue(o.orcadoEfetivo);
+  // ===============================================
+  // DECISÃO: Qual fonte de dados usar?
+  // ===============================================
+  
+  // SE: Usuário selecionou "Base = Carteira" OU Campo 3 está vazio
+  // E: Campo 3.1 tem dados
+  // ENTÃO: Usar Campo 3.1
+  if ((useCarteiraBase || !hasCampo3Data) && hasCampo31Data) {
+    console.log('✅ USANDO CAMPO 3.1 (orcados_por_carteira)');
+    
+    const carteirasDestePrefixo = orcadosPorCarteira.filter(o => o.prefixo === prefixo);
+    
+    const total = carteirasDestePrefixo.reduce((sum, carteira) => {
+      // Usar orcadoEfetivo se já estiver calculado
+      if (carteira.orcadoEfetivo !== undefined && carteira.orcadoEfetivo !== null) {
+        return sum + parseNumericValue(carteira.orcadoEfetivo);
       }
-      // Fallback: calcular manualmente
-      const valor = parseNumericValue(o.valor || o.orcadoBruto || 0);
-      const realizado = parseNumericValue(o.realizado || 0);
-      const fatorMeta = parseNumericValue(o.fatorMeta || 100) / 100;
-      return sum + Math.max(0, (valor * fatorMeta) - realizado);
+      
+      // Caso contrário, calcular: (orcado × meta%) - realizado
+      const orcadoBruto = parseNumericValue(carteira.orcadoBruto || carteira.valor || 0);
+      const realizado = parseNumericValue(carteira.realizado || 0);
+      const fatorMeta = parseNumericValue(carteira.fatorMeta || 100) / 100;
+      const orcadoEfetivo = Math.max(0, (orcadoBruto * fatorMeta) - realizado);
+      
+      return sum + orcadoEfetivo;
     }, 0);
-    console.log(`Total orçado para ${prefixo}: ${total}`);
+    
+    console.log(`💰 Total orçado para ${prefixo}: R$ ${total.toFixed(2)} (${carteirasDestePrefixo.length} carteiras)`);
     return total;
   }
   
-  // PRIORIDADE 2: Usar Campo 3 (Orçamento por Tipo × Produto)
-  console.log('Usando CAMPO 3 (Orçamento por Tipo)');
+  // ===============================================
+  // CASO CONTRÁRIO: Usar Campo 3 (orcamento_por_tipo)
+  // ===============================================
+  
+  console.log('✅ USANDO CAMPO 3 (orcamento_por_tipo)');
+  
   const carteirasAgencia = carteiras.filter(c => c.prefixo === prefixo);
   
-  // NOVO FORMATO: orcadosPorTipo é um objeto { "tipo-produto": valor }
+  // FORMATO NOVO: orcadosPorTipo é um objeto { "tipo-produto": valor }
   if (typeof orcadosPorTipo === 'object' && !Array.isArray(orcadosPorTipo)) {
     let totalOrcado = 0;
     carteirasAgencia.forEach(cart => {
@@ -50,6 +75,7 @@ export const calculateOrcadoPorAgencia = (prefixo, carteiras, orcadosPorTipo, or
       const orcamento = orcadosPorTipo[tipo] || 0;
       totalOrcado += parseNumericValue(orcamento);
     });
+    console.log(`💰 Total orçado para ${prefixo}: R$ ${totalOrcado.toFixed(2)}`);
     return totalOrcado;
   }
   
@@ -69,6 +95,7 @@ export const calculateOrcadoPorAgencia = (prefixo, carteiras, orcadosPorTipo, or
     totalOrcado += somaOrcados * qtd;
   });
   
+  console.log(`💰 Total orçado para ${prefixo}: R$ ${totalOrcado.toFixed(2)}`);
   return totalOrcado;
 };
 
