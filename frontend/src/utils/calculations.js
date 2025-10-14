@@ -3,10 +3,33 @@ import { parseNumericValue } from './dataParser';
 export const calculateOrcadoPorAgencia = (prefixo, carteiras, orcadosPorTipo, orcadosPorCarteira, useCarteiraBase) => {
   if (!prefixo) return 0;
   
+  // Opção 1: Usar dados do Campo 3.1 (Orçamento por Carteira com %)
   if (useCarteiraBase && orcadosPorCarteira && orcadosPorCarteira.length > 0) {
     const orcados = orcadosPorCarteira.filter(o => o.prefixo === prefixo);
     return orcados.reduce((sum, o) => {
-      const valor = parseNumericValue(o.valor);
+      // Usar orcadoEfetivo se existir, senão calcular
+      if (o.orcadoEfetivo !== undefined) {
+        return sum + parseNumericValue(o.orcadoEfetivo);
+      }
+      const valor = parseNumericValue(o.valor || 0);
+      const fatorMeta = parseNumericValue(o.fatorMeta || 100) / 100;
+      return sum + (valor * fatorMeta);
+    }, 0);
+  }
+  
+  // Verificar se Campo 3 (orcadosPorTipo) tem dados
+  const temDadosCampo3 = orcadosPorTipo && 
+    ((typeof orcadosPorTipo === 'object' && Object.keys(orcadosPorTipo).length > 0) ||
+     (Array.isArray(orcadosPorTipo) && orcadosPorTipo.length > 0));
+  
+  // Se Campo 3 estiver vazio, usar Campo 3.1 automaticamente
+  if (!temDadosCampo3 && orcadosPorCarteira && orcadosPorCarteira.length > 0) {
+    const orcados = orcadosPorCarteira.filter(o => o.prefixo === prefixo);
+    return orcados.reduce((sum, o) => {
+      if (o.orcadoEfetivo !== undefined) {
+        return sum + parseNumericValue(o.orcadoEfetivo);
+      }
+      const valor = parseNumericValue(o.valor || o.orcadoBruto || 0);
       const fatorMeta = parseNumericValue(o.fatorMeta || 100) / 100;
       return sum + (valor * fatorMeta);
     }, 0);
@@ -14,7 +37,7 @@ export const calculateOrcadoPorAgencia = (prefixo, carteiras, orcadosPorTipo, or
   
   const carteirasAgencia = carteiras.filter(c => c.prefixo === prefixo);
   
-  // NOVO FORMATO: orcadosPorTipo é um objeto { tipoCarteira: valor }
+  // NOVO FORMATO: orcadosPorTipo é um objeto { "tipo-produto": valor }
   if (typeof orcadosPorTipo === 'object' && !Array.isArray(orcadosPorTipo)) {
     let totalOrcado = 0;
     carteirasAgencia.forEach(cart => {
