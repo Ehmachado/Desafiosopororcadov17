@@ -110,6 +110,10 @@ const Dashboard = () => {
             <OrcamentoSimples />
           </TabsContent>
 
+          <TabsContent value="orcamento-carteira" className="fade-in">
+            <OrcamentoPorCarteira />
+          </TabsContent>
+
           <TabsContent value="redes" className="fade-in">
             <RedesConfig />
           </TabsContent>
