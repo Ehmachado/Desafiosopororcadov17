@@ -182,25 +182,18 @@ const OrcamentoPorCarteira = () => {
     
     // Recalcular orcadoEfetivo de todos os dados existentes
     const updatedData = orcadosPorCarteira.map(item => {
-      const orcadoEfetivoPorProduto = {};
-      
-      produtosArray.forEach(produto => {
-        const orcadoValor = item.orcadoPorProduto[produto] || 0;
-        const realizadoValor = item.realizadoPorProduto[produto] || 0;
-        const orcadoEfetivo = Math.max(0, (orcadoValor * tempMetaPercentual / 100) - realizadoValor);
-        orcadoEfetivoPorProduto[produto] = orcadoEfetivo;
-      });
+      const orcadoEfetivo = Math.max(0, (item.orcado * tempMetaPercentual / 100) - item.realizado);
 
       return {
         ...item,
-        orcadoEfetivoPorProduto,
+        orcadoEfetivo,
         metaPercentual: tempMetaPercentual
       };
     });
 
     setOrcadosPorCarteira(updatedData);
     toast.success('Meta atualizada e orçamentos recalculados!');
-  }, [tempMetaPercentual, setMetaPercentual, orcadosPorCarteira, setOrcadosPorCarteira, produtosArray]);
+  }, [tempMetaPercentual, setMetaPercentual, orcadosPorCarteira, setOrcadosPorCarteira]);
 
   // Calcular orçamento por agência (soma das carteiras)
   const orcamentoPorAgencia = useMemo(() => {
