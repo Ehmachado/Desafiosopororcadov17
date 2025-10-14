@@ -127,71 +127,60 @@ backend:
         comment: "No backend changes required for this feature"
 
 frontend:
-  - task: "Remove Campo 7 (ControleDiario) from Dashboard"
+  - task: "Create new OrcamentoPorCarteira.jsx (Campo 3.1) from scratch"
     implemented: true
     working: true
-    file: "/app/frontend/src/pages/Dashboard.jsx"
+    file: "/app/frontend/src/components/OrcamentoPorCarteira.jsx"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
-    status_history:
-      - working: true
-        agent: "main"
-        comment: "Successfully removed Campo 7 tab and component from Dashboard. Tab no longer appears in navigation."
-
-  - task: "Add daily control to Campo 5 (RealizadoTipo)"
-    implemented: true
-    working: true
-    file: "/app/frontend/src/components/RealizadoTipo.jsx"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: true
         agent: "main"
         comment: |
-          Successfully integrated daily control into Campo 5:
-          - Added day selector (1 to diasDesafio)
-          - Added realizadosDiarios localStorage state
-          - Added handleSaveDiario() and handleClearDiario() functions
-          - Added realizadoAcumulado calculation (sum of all days <= selectedDay)
-          - Added UI showing accumulated totals
-          - Data structure: { prefixo, produto, valor, dia }
+          Successfully created Campo 3.1 with all requested features:
+          - Textarea for pasting tab-separated data
+          - Automatic column detection (Prefixo, Agência, Carteira, Tipo de Carteira, Orçado, Realizado)
+          - Multi-product support with separate columns for each product
+          - % Meta control (slider 0-200%)
+          - Calculation: Orçado Efetivo = (Orçado × % Meta / 100) - Realizado
+          - Display tables: Orçado por Agência and Orçado por Tipo × Produto
+          - Performance optimized with useMemo and useCallback
+          - Data saved to localStorage as 'orcados_por_carteira_v2'
 
-  - task: "Add daily control to Campo 6 (RealizadoCarteira)"
+  - task: "Update calculations.js to support Campo 3.1 V2"
     implemented: true
     working: true
-    file: "/app/frontend/src/components/RealizadoCarteira.jsx"
+    file: "/app/frontend/src/utils/calculations.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: true
         agent: "main"
         comment: |
-          Successfully integrated daily control into Campo 6:
-          - Added day selector (1 to diasDesafio)
-          - Added realizadosDiarios localStorage state
-          - Added handleSaveDiario() and handleClearDiario() functions
-          - Added realizadoAcumulado calculation (sum of all days <= selectedDay)
-          - Added UI showing accumulated totals
-          - Data structure: { prefixo, carteira, tipoCarteira, valor, dia }
+          Updated calculateOrcadoPorAgencia function:
+          - Added support for 'orcados_por_carteira_v2' format
+          - Added optional 'produto' parameter for product-specific calculations
+          - Fallback logic: uses Campo 3.1 when Campo 3 is empty
+          - Correctly calculates orçado efetivo per product
 
-  - task: "Update Campo 8 (RankingExport) to use daily accumulated data"
+  - task: "Update RankingExport.jsx to use Campo 3.1 V2 data"
     implemented: true
     working: true
     file: "/app/frontend/src/components/RankingExport.jsx"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: true
         agent: "main"
         comment: |
-          Successfully updated RankingExport to use new daily data:
-          - Changed localStorage keys from 'realizados_diarios' to 'realizados_tipo_diarios' and 'realizados_carteira_diarios'
-          - Updated calculation logic to sum all days <= diaFiltro
-          - Ranking now correctly uses accumulated totals from Campos 5 and 6
+          Updated RankingExport to integrate with Campo 3.1 V2:
+          - Changed localStorage key to 'orcados_por_carteira_v2'
+          - Updated calculateOrcadoPorAgencia calls to use new format
+          - Passes product parameter for per-product budget calculations
+          - Ranking correctly pulls budget from Campo 3.1 when Campo 3 is empty
 
 metadata:
   created_by: "main_agent"
