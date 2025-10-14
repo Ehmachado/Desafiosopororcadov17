@@ -1,6 +1,6 @@
 import { parseNumericValue } from './dataParser';
 
-export const calculateOrcadoPorAgencia = (prefixo, carteiras, orcadosPorTipo, orcadosPorCarteira, useCarteiraBase) => {
+export const calculateOrcadoPorAgencia = (prefixo, carteiras, orcadosPorTipo, orcadosPorCarteiraV2, useCarteiraBase, produto = null) => {
   if (!prefixo) return 0;
   
   // Verificar se Campo 3 (orcamento_por_tipo) tem ALGUM dado
@@ -15,17 +15,18 @@ export const calculateOrcadoPorAgencia = (prefixo, carteiras, orcadosPorTipo, or
     }
   }
   
-  // Verificar se Campo 3.1 (orcados_por_carteira) tem dados
-  const hasCampo31Data = orcadosPorCarteira && orcadosPorCarteira.length > 0;
+  // Verificar se Campo 3.1 V2 (orcados_por_carteira_v2) tem dados
+  const hasCampo31Data = orcadosPorCarteiraV2 && orcadosPorCarteiraV2.length > 0;
   
   console.log('🔍 calculateOrcadoPorAgencia:', {
     prefixo,
+    produto,
     hasCampo3Data,
     hasCampo31Data,
     useCarteiraBase,
     orcadosPorTipoType: typeof orcadosPorTipo,
     orcadosPorTipoKeys: typeof orcadosPorTipo === 'object' ? Object.keys(orcadosPorTipo).length : 0,
-    orcadosPorCarteiraLength: orcadosPorCarteira?.length || 0
+    orcadosPorCarteiraV2Length: orcadosPorCarteiraV2?.length || 0
   });
   
   // ===============================================
@@ -36,23 +37,34 @@ export const calculateOrcadoPorAgencia = (prefixo, carteiras, orcadosPorTipo, or
   // E: Campo 3.1 tem dados
   // ENTÃO: Usar Campo 3.1
   if ((useCarteiraBase || !hasCampo3Data) && hasCampo31Data) {
-    console.log('✅ USANDO CAMPO 3.1 (orcados_por_carteira)');
+    console.log('✅ USANDO CAMPO 3.1 V2 (orcados_por_carteira_v2)');
     
-    const carteirasDestePrefixo = orcadosPorCarteira.filter(o => o.prefixo === prefixo);
+    const carteirasDestePrefixo = orcadosPorCarteiraV2.filter(o => o.prefixo === prefixo);
     
+    // Se produto for especificado, somar apenas esse produto
+    if (produto) {
+      const total = carteirasDestePrefixo.reduce((sum, carteira) => {
+        // Usar orcadoEfetivoPorProduto se disponível
+        if (carteira.orcadoEfetivoPorProduto && carteira.orcadoEfetivoPorProduto[produto] !== undefined) {
+          return sum + parseNumericValue(carteira.orcadoEfetivoPorProduto[produto]);
+        }
+        return sum;
+      }, 0);
+      
+      console.log(`💰 Total orçado para ${prefixo} - ${produto}: R$ ${total.toFixed(2)}`);
+      return total;
+    }
+    
+    // Caso contrário, somar todos os produtos
     const total = carteirasDestePrefixo.reduce((sum, carteira) => {
-      // Usar orcadoEfetivo se já estiver calculado
-      if (carteira.orcadoEfetivo !== undefined && carteira.orcadoEfetivo !== null) {
-        return sum + parseNumericValue(carteira.orcadoEfetivo);
+      if (carteira.orcadoEfetivoPorProduto) {
+        const totalCarteira = Object.values(carteira.orcadoEfetivoPorProduto).reduce(
+          (s, val) => s + parseNumericValue(val), 
+          0
+        );
+        return sum + totalCarteira;
       }
-      
-      // Caso contrário, calcular: (orcado × meta%) - realizado
-      const orcadoBruto = parseNumericValue(carteira.orcadoBruto || carteira.valor || 0);
-      const realizado = parseNumericValue(carteira.realizado || 0);
-      const fatorMeta = parseNumericValue(carteira.fatorMeta || 100) / 100;
-      const orcadoEfetivo = Math.max(0, (orcadoBruto * fatorMeta) - realizado);
-      
-      return sum + orcadoEfetivo;
+      return sum;
     }, 0);
     
     console.log(`💰 Total orçado para ${prefixo}: R$ ${total.toFixed(2)} (${carteirasDestePrefixo.length} carteiras)`);
@@ -69,11 +81,29 @@ export const calculateOrcadoPorAgencia = (prefixo, carteiras, orcadosPorTipo, or
   
   // FORMATO NOVO: orcadosPorTipo é um objeto { "tipo-produto": valor }
   if (typeof orcadosPorTipo === 'object' && !Array.isArray(orcadosPorTipo)) {
+    // Se produto for especificado, calcular apenas para esse produto
+    if (produto) {
+      let totalOrcado = 0;
+      carteirasAgencia.forEach(cart => {
+        const tipo = cart.tipoCarteira;
+        const key = `${tipo}-${produto}`;
+        const orcamento = orcadosPorTipo[key] || 0;
+        totalOrcado += parseNumericValue(orcamento);
+      });
+      console.log(`💰 Total orçado para ${prefixo} - ${produto}: R$ ${totalOrcado.toFixed(2)}`);
+      return totalOrcado;
+    }
+    
+    // Caso contrário, somar todos os produtos
     let totalOrcado = 0;
     carteirasAgencia.forEach(cart => {
       const tipo = cart.tipoCarteira;
-      const orcamento = orcadosPorTipo[tipo] || 0;
-      totalOrcado += parseNumericValue(orcamento);
+      // Somar todos os produtos deste tipo
+      Object.keys(orcadosPorTipo).forEach(key => {
+        if (key.startsWith(`${tipo}-`)) {
+          totalOrcado += parseNumericValue(orcadosPorTipo[key]);
+        }
+      });
     });
     console.log(`💰 Total orçado para ${prefixo}: R$ ${totalOrcado.toFixed(2)}`);
     return totalOrcado;
