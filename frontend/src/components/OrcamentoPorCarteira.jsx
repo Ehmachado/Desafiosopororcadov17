@@ -196,8 +196,8 @@ const OrcamentoPorCarteira = () => {
         agencia: '',
         carteira: '',
         tipoCarteira: '',
-        orcado: '',
-        realizado: ''
+        orcado: {},
+        realizado: {}
       });
       toast.success('Dados limpos com sucesso!');
     }
