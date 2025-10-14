@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Settings, Database, TrendingUp, BarChart3, FileDown } from 'lucide-react';
+import { Settings, Database, TrendingUp, BarChart3, FileDown, Percent } from 'lucide-react';
 import ChallengeConfig from '../components/ChallengeConfig';
 import CarteirasMaster from '../components/CarteirasMaster';
 import OrcamentoSimples from '../components/OrcamentoSimples';
+import OrcamentoPorCarteira from '../components/OrcamentoPorCarteira';
 import RedesConfig from '../components/RedesConfig';
 import RealizadoTipo from '../components/RealizadoTipo';
 import RealizadoCarteira from '../components/RealizadoCarteira';
