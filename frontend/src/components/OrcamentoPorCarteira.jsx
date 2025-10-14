@@ -314,38 +314,44 @@ const OrcamentoPorCarteira = () => {
         <div className="bb-card">
           <div className="bb-card-header">
             <h2 className="bb-card-title">Orçamento por Agência</h2>
-            <p className="bb-card-subtitle">Meta efetiva por agência ({fatorMeta}%)</p>
+            <p className="bb-card-subtitle">Fórmula: (Orçado × {fatorMeta}%) - Realizado</p>
           </div>
 
           <div style={{ padding: '16px', background: '#e3f2fd', borderRadius: '8px', marginBottom: '16px' }}>
-            <p style={{ fontSize: '14px', marginBottom: '4px' }}>Total Geral (Meta Efetiva):</p>
+            <p style={{ fontSize: '14px', marginBottom: '4px' }}>Total Geral (Orçado Efetivo):</p>
             <p style={{ fontSize: '24px', fontWeight: 700, color: 'var(--bb-blue)' }}>
               {formatCurrency(totalGeral)}
             </p>
           </div>
 
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Prefixo</th>
-                <th>Agência</th>
-                <th>Qtd. Carteiras</th>
-                <th>Meta Efetiva</th>
-              </tr>
-            </thead>
-            <tbody>
-              {orcamentosAgencia.map(agencia => (
-                <tr key={agencia.prefixo}>
-                  <td style={{ fontWeight: 600 }}>{agencia.prefixo}</td>
-                  <td>{agencia.agencia}</td>
-                  <td>{agencia.carteiras.length}</td>
-                  <td style={{ fontWeight: 600, color: 'var(--bb-blue)' }}>
-                    {formatCurrency(agencia.total)}
-                  </td>
+          <div style={{ overflowX: 'auto' }}>
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Prefixo</th>
+                  <th>Agência</th>
+                  <th>Qtd. Carteiras</th>
+                  <th>Orçado Bruto</th>
+                  <th>Realizado</th>
+                  <th>Orçado Efetivo</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {orcamentosAgencia.map(agencia => (
+                  <tr key={agencia.prefixo}>
+                    <td style={{ fontWeight: 600 }}>{agencia.prefixo}</td>
+                    <td>{agencia.agencia}</td>
+                    <td>{agencia.carteiras.length}</td>
+                    <td>{formatCurrency(agencia.totalOrcadoBruto)}</td>
+                    <td>{formatCurrency(agencia.totalRealizado)}</td>
+                    <td style={{ fontWeight: 600, color: 'var(--bb-blue)' }}>
+                      {formatCurrency(agencia.totalOrcadoEfetivo)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>
