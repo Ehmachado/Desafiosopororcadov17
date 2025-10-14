@@ -19,8 +19,8 @@ const OrcamentoPorCarteira = () => {
     agencia: '',
     carteira: '',
     tipoCarteira: '',
-    orcado: {}, // Objeto: { produto: colIndex }
-    realizado: {} // Objeto: { produto: colIndex }
+    orcado: '',
+    realizado: ''
   });
   
   // Estado para slider de meta
