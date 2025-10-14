@@ -156,30 +156,16 @@ const RankingExport = () => {
         
         produtosRanking.forEach(produto => {
           // Calcular orçado para este produto específico
-          let orcadoProduto = 0;
-          
-          // Mapear "Vida Total" para "Vida" nos orçamentos
+          // Usar calculateOrcadoPorAgencia com produto específico
           const produtoBusca = produto === 'Vida Total' ? 'Vida' : produto;
-          
-          // NOVO FORMATO: orcadosPorTipo é um objeto { "tipo-produto": valor }
-          if (typeof orcadosPorTipo === 'object' && !Array.isArray(orcadosPorTipo)) {
-            // Para cada tipo de carteira, buscar orçado específico para este produto
-            Object.entries(tiposCount).forEach(([tipo, qtd]) => {
-              const key = `${tipo}-${produtoBusca}`;
-              const orcadoTipo = orcadosPorTipo[key] || 0;
-              orcadoProduto += (parseFloat(orcadoTipo) || 0) * qtd;
-            });
-          } else {
-            // FORMATO ANTIGO: orcadosPorTipo é um array
-            Object.entries(tiposCount).forEach(([tipo, qtd]) => {
-              const orcadoTipo = orcadosPorTipo.find(o => 
-                o.tipoCarteira === tipo && o.produto === produtoBusca
-              );
-              if (orcadoTipo) {
-                orcadoProduto += (parseFloat(orcadoTipo.valor) || 0) * qtd;
-              }
-            });
-          }
+          const orcadoProduto = calculateOrcadoPorAgencia(
+            prefixo, 
+            carteiras, 
+            orcadosPorTipo, 
+            orcadosPorCarteiraV2, 
+            useCarteiraBase, 
+            produtoBusca
+          );
           
           orcadosPorProduto[produto] = orcadoProduto;
           
