@@ -122,7 +122,8 @@ const RankingExport = () => {
         const redeInfo = redes.find(r => r.prefixo === prefixo);
         const rede = redeInfo?.rede || 'Sem Rede';
 
-        const useCarteiraBase = baseCalculo === 'carteira' && orcadosPorCarteira.length > 0;
+        // Sempre passar orcadosPorCarteira, deixar a função decidir se usa
+        const useCarteiraBase = baseCalculo === 'carteira';
         const orcado = calculateOrcadoPorAgencia(prefixo, carteiras, orcadosPorTipo, orcadosPorCarteira, useCarteiraBase);
 
         const atingimentos = {};
