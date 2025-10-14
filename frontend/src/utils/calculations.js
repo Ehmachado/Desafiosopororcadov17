@@ -41,26 +41,33 @@ export const calculateOrcadoPorAgencia = (prefixo, carteiras, orcadosPorTipo, or
     
     const carteirasDestePrefixo = orcadosPorCarteiraV2.filter(o => o.prefixo === prefixo);
     
-    // Nova estrutura: cada carteira tem orcadoEfetivo (valor único)
-    // que é distribuído igualmente entre todos os produtos
-    const totalProdutos = orcadosPorCarteiraV2.length > 0 ? 
-      Object.keys(JSON.parse(localStorage.getItem('challenge_produtos') || '[]')).length || 1 : 1;
+    // Se produto for especificado, somar apenas esse produto
+    if (produto) {
+      const total = carteirasDestePrefixo.reduce((sum, carteira) => {
+        // Usar orcadoEfetivoPorProduto se disponível
+        if (carteira.orcadoEfetivoPorProduto && carteira.orcadoEfetivoPorProduto[produto] !== undefined) {
+          return sum + parseNumericValue(carteira.orcadoEfetivoPorProduto[produto]);
+        }
+        return sum;
+      }, 0);
+      
+      console.log(`💰 Total orçado para ${prefixo} - ${produto}: R$ ${total.toFixed(2)}`);
+      return total;
+    }
     
+    // Caso contrário, somar todos os produtos
     const total = carteirasDestePrefixo.reduce((sum, carteira) => {
-      const orcadoEfetivo = parseNumericValue(carteira.orcadoEfetivo || 0);
-      // Se produto específico, dividir o orçado pelo número de produtos
-      if (produto) {
-        return sum + (orcadoEfetivo / totalProdutos);
+      if (carteira.orcadoEfetivoPorProduto) {
+        const totalCarteira = Object.values(carteira.orcadoEfetivoPorProduto).reduce(
+          (s, val) => s + parseNumericValue(val), 
+          0
+        );
+        return sum + totalCarteira;
       }
-      // Caso contrário, somar o total
-      return sum + orcadoEfetivo;
+      return sum;
     }, 0);
     
-    if (produto) {
-      console.log(`💰 Total orçado para ${prefixo} - ${produto}: R$ ${total.toFixed(2)}`);
-    } else {
-      console.log(`💰 Total orçado para ${prefixo}: R$ ${total.toFixed(2)} (${carteirasDestePrefixo.length} carteiras)`);
-    }
+    console.log(`💰 Total orçado para ${prefixo}: R$ ${total.toFixed(2)} (${carteirasDestePrefixo.length} carteiras)`);
     return total;
   }
   
