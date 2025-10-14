@@ -281,31 +281,35 @@ const OrcamentoPorCarteira = () => {
         <div className="bb-card">
           <div className="bb-card-header">
             <h2 className="bb-card-title">Orçamento por Tipo de Carteira</h2>
-            <p className="bb-card-subtitle">Resumo por tipo com meta efetiva ({fatorMeta}%)</p>
+            <p className="bb-card-subtitle">Fórmula: (Orçado × {fatorMeta}%) - Realizado</p>
           </div>
 
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Tipo de Carteira</th>
-                <th>Qtd. Carteiras</th>
-                <th>Total Orçado</th>
-                <th>Meta Efetiva ({fatorMeta}%)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {Object.values(porTipo).map(item => (
-                <tr key={item.tipo}>
-                  <td style={{ fontWeight: 600 }}>{item.tipo}</td>
-                  <td>{item.qtdCarteiras}</td>
-                  <td>{formatCurrency(item.totalOrcado)}</td>
-                  <td style={{ fontWeight: 600, color: 'var(--bb-blue)' }}>
-                    {formatCurrency(item.totalMeta)}
-                  </td>
+          <div style={{ overflowX: 'auto' }}>
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Tipo de Carteira</th>
+                  <th>Qtd. Carteiras</th>
+                  <th>Orçado Bruto</th>
+                  <th>Realizado</th>
+                  <th>Orçado Efetivo</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {Object.values(porTipo).map(item => (
+                  <tr key={item.tipo}>
+                    <td style={{ fontWeight: 600 }}>{item.tipo}</td>
+                    <td>{item.qtdCarteiras}</td>
+                    <td>{formatCurrency(item.totalOrcadoBruto)}</td>
+                    <td>{formatCurrency(item.totalRealizado)}</td>
+                    <td style={{ fontWeight: 600, color: 'var(--bb-blue)' }}>
+                      {formatCurrency(item.totalOrcadoEfetivo)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
