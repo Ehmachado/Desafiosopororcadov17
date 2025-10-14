@@ -76,6 +76,10 @@ const Dashboard = () => {
               <TrendingUp size={16} style={{ marginRight: '6px' }} />
               Orçamento
             </TabsTrigger>
+            <TabsTrigger value="orcamento-carteira" data-testid="tab-orcamento-carteira">
+              <Percent size={16} style={{ marginRight: '6px' }} />
+              Orçamento Carteira
+            </TabsTrigger>
             <TabsTrigger value="redes" data-testid="tab-redes">
               <BarChart3 size={16} style={{ marginRight: '6px' }} />
               Redes
