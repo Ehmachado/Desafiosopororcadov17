@@ -522,12 +522,12 @@ const OrcamentoPorCarteira = () => {
         </div>
       )}
 
-      {/* Seção 4: Orçamento por Tipo de Carteira × Produto */}
+      {/* Seção 4: Orçamento por Tipo de Carteira × Produto (similar ao Campo 3) */}
       {orcamentoPorTipo.length > 0 && (
         <div className="bb-card">
           <div className="bb-card-header">
             <h2 className="bb-card-title">Orçamento por Tipo de Carteira × Produto</h2>
-            <p className="bb-card-subtitle">Distribuição dos orçamentos efetivos por tipo e produto</p>
+            <p className="bb-card-subtitle">Distribuição dos orçamentos efetivos por tipo e produto (similar ao Campo 3)</p>
           </div>
 
           <div style={{ overflowX: 'auto' }}>
@@ -539,7 +539,7 @@ const OrcamentoPorCarteira = () => {
                   {produtosArray.map(produto => (
                     <th key={produto} style={{ textAlign: 'right' }}>
                       {produto}<br/>
-                      <span style={{ fontSize: '11px', fontWeight: 'normal' }}>Total Efetivo</span>
+                      <span style={{ fontSize: '11px', fontWeight: 'normal' }}>Orçado Efetivo</span>
                     </th>
                   ))}
                 </tr>
@@ -551,7 +551,7 @@ const OrcamentoPorCarteira = () => {
                     <td>{tipo.qtdCarteiras} carteiras</td>
                     {produtosArray.map(produto => (
                       <td key={produto} style={{ textAlign: 'right', fontWeight: 600, color: 'var(--bb-blue)' }}>
-                        {formatCurrency(tipo.orcadoEfetivoPorProduto[produto] || 0)}
+                        {formatCurrency(tipo.totalPorProduto[produto] || 0)}
                       </td>
                     ))}
                   </tr>
