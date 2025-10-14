@@ -1,116 +1,142 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
-import { Save, Trash2, FileText, Percent } from 'lucide-react';
+import { Save, Trash2, FileText, Percent, AlertCircle } from 'lucide-react';
 import { formatCurrency, parseNumericValue } from '../utils/dataParser';
 import { toast } from 'sonner';
-import ColumnMapper from './ColumnMapper';
-import DataPreview from './DataPreview';
 
 const OrcamentoPorCarteira = () => {
-  const [produtos] = useLocalStorage('challenge_produtos', []);
-  const [carteiras] = useLocalStorage('carteiras_master', []);
   const [orcadosPorCarteira, setOrcadosPorCarteira] = useLocalStorage('orcados_por_carteira', []);
   const [fatorMeta, setFatorMeta] = useLocalStorage('fator_meta_desafio', 100);
   
   const [rawData, setRawData] = useState('');
   const [parsedRows, setParsedRows] = useState([]);
   const [columnMapping, setColumnMapping] = useState({});
-  const [showMapper, setShowMapper] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  const requiredFields = [
-    { id: 'prefixo', label: 'Prefixo' },
-    { id: 'agencia', label: 'Agência/Dependência' },
-    { id: 'carteira', label: 'Carteira' },
-    { id: 'tipoCarteira', label: 'Tipo de Carteira' },
-    { id: 'orcado', label: 'Orçado' },
-    { id: 'realizado', label: 'Realizado' }
-  ];
-
-  useEffect(() => {
-    if (rawData.trim()) {
-      const lines = rawData.trim().split('\n');
-      const parsed = lines.map(line => {
-        const cols = line.split('\t');
-        return cols;
-      });
-      setParsedRows(parsed);
-
-      // Auto-detect columns
-      if (parsed.length > 0) {
-        const headers = parsed[0];
-        const autoMapping = {};
-
-        headers.forEach((header, index) => {
-          const normalized = header.toLowerCase().trim();
-          
-          if (normalized.includes('prefixo') || normalized.includes('pref')) {
-            autoMapping.prefixo = index;
-          } else if (normalized.includes('agencia') || normalized.includes('agência') || normalized.includes('depend')) {
-            autoMapping.agencia = index;
-          } else if (normalized.includes('carteira') && !normalized.includes('tipo')) {
-            autoMapping.carteira = index;
-          } else if (normalized.includes('tipo')) {
-            autoMapping.tipoCarteira = index;
-          } else if (normalized.includes('orcado') || normalized.includes('orçado') || normalized.includes('conexao') || normalized.includes('conexão')) {
-            autoMapping.orcado = index;
-          } else if (normalized.includes('realizado') || normalized.includes('realizada')) {
-            autoMapping.realizado = index;
-          }
-        });
-
-        if (Object.keys(autoMapping).length >= 5) {
-          setColumnMapping(autoMapping);
-          setShowMapper(false);
-        } else {
-          setShowMapper(true);
-        }
+  // Detectar colunas automaticamente
+  const detectColumns = useCallback((headers) => {
+    const autoMapping = {};
+    
+    headers.forEach((header, index) => {
+      const normalized = header.toLowerCase().trim();
+      
+      if (!autoMapping.prefixo && (normalized.includes('prefixo') || normalized.includes('pref'))) {
+        autoMapping.prefixo = index;
+      } else if (!autoMapping.agencia && (normalized.includes('agencia') || normalized.includes('agência') || normalized.includes('depend'))) {
+        autoMapping.agencia = index;
+      } else if (!autoMapping.carteira && normalized.includes('carteira') && !normalized.includes('tipo')) {
+        autoMapping.carteira = index;
+      } else if (!autoMapping.tipoCarteira && normalized.includes('tipo')) {
+        autoMapping.tipoCarteira = index;
+      } else if (!autoMapping.orcado && (normalized.includes('orcado') || normalized.includes('orçado') || normalized.includes('conexao') || normalized.includes('conexão'))) {
+        autoMapping.orcado = index;
+      } else if (!autoMapping.realizado && (normalized.includes('realizado') || normalized.includes('realizada'))) {
+        autoMapping.realizado = index;
       }
-    }
-  }, [rawData]);
+    });
+    
+    return autoMapping;
+  }, []);
 
-  const handleSave = () => {
-    if (parsedRows.length === 0 || Object.keys(columnMapping).length === 0) {
-      toast.error('Cole os dados e configure as colunas primeiro');
+  // Processar dados com debounce
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (rawData.trim()) {
+        setIsProcessing(true);
+        
+        // Processar de forma assíncrona
+        setTimeout(() => {
+          try {
+            const lines = rawData.trim().split('\n');
+            const parsed = lines.slice(0, 1000).map(line => line.split('\t')); // Limitar a 1000 linhas
+            
+            setParsedRows(parsed);
+            
+            if (parsed.length > 0) {
+              const headers = parsed[0];
+              const mapping = detectColumns(headers);
+              
+              if (Object.keys(mapping).length >= 5) {
+                setColumnMapping(mapping);
+              }
+            }
+          } catch (error) {
+            console.error('Erro ao processar dados:', error);
+            toast.error('Erro ao processar dados. Verifique o formato.');
+          } finally {
+            setIsProcessing(false);
+          }
+        }, 100);
+      } else {
+        setParsedRows([]);
+        setColumnMapping({});
+      }
+    }, 500); // Debounce de 500ms
+
+    return () => clearTimeout(timer);
+  }, [rawData, detectColumns]);
+
+  const handleSave = useCallback(() => {
+    if (parsedRows.length === 0) {
+      toast.error('Cole os dados primeiro');
       return;
     }
 
-    const data = [];
-    parsedRows.slice(1).forEach(row => {
-      if (row.length < 2) return;
+    if (Object.keys(columnMapping).length < 5) {
+      toast.error('Configure todas as colunas obrigatórias');
+      return;
+    }
 
-      const prefixo = row[columnMapping.prefixo] || '';
-      const agencia = row[columnMapping.agencia] || '';
-      const carteira = row[columnMapping.carteira] || '';
-      const tipoCarteira = row[columnMapping.tipoCarteira] || '';
-      const orcadoStr = row[columnMapping.orcado] || '0';
-      const realizadoStr = row[columnMapping.realizado] || '0';
-
-      if (prefixo && carteira) {
-        const orcadoBruto = parseNumericValue(orcadoStr);
-        const realizado = parseNumericValue(realizadoStr);
+    setIsProcessing(true);
+    
+    // Processar em chunks para não travar
+    setTimeout(() => {
+      try {
+        const data = [];
+        const dataRows = parsedRows.slice(1); // Pular cabeçalho
         
-        // Cálculo: (Orçado × % Meta / 100) - Realizado
-        const orcadoComMeta = orcadoBruto * (fatorMeta / 100);
-        const orcadoEfetivo = Math.max(0, orcadoComMeta - realizado);
+        for (let i = 0; i < dataRows.length; i++) {
+          const row = dataRows[i];
+          if (row.length < 2) continue;
 
-        data.push({
-          prefixo: prefixo.trim(),
-          agencia: agencia.trim(),
-          carteira: carteira.trim(),
-          tipoCarteira: tipoCarteira.trim(),
-          orcadoBruto: orcadoBruto,
-          realizado: realizado,
-          orcadoEfetivo: orcadoEfetivo,
-          fatorMeta: fatorMeta
-        });
+          const prefixo = row[columnMapping.prefixo] || '';
+          const agencia = row[columnMapping.agencia] || '';
+          const carteira = row[columnMapping.carteira] || '';
+          const tipoCarteira = row[columnMapping.tipoCarteira] || '';
+          const orcadoStr = row[columnMapping.orcado] || '0';
+          const realizadoStr = row[columnMapping.realizado] || '0';
+
+          if (prefixo && carteira) {
+            const orcadoBruto = parseNumericValue(orcadoStr);
+            const realizado = parseNumericValue(realizadoStr);
+            const orcadoComMeta = orcadoBruto * (fatorMeta / 100);
+            const orcadoEfetivo = Math.max(0, orcadoComMeta - realizado);
+
+            data.push({
+              prefixo: prefixo.trim(),
+              agencia: agencia.trim(),
+              carteira: carteira.trim(),
+              tipoCarteira: tipoCarteira.trim(),
+              orcadoBruto,
+              realizado,
+              orcadoEfetivo,
+              fatorMeta
+            });
+          }
+        }
+
+        setOrcadosPorCarteira(data);
+        toast.success(`${data.length} carteiras salvas com sucesso!`);
+      } catch (error) {
+        console.error('Erro ao salvar:', error);
+        toast.error('Erro ao salvar dados');
+      } finally {
+        setIsProcessing(false);
       }
-    });
+    }, 100);
+  }, [parsedRows, columnMapping, fatorMeta, setOrcadosPorCarteira]);
 
-    setOrcadosPorCarteira(data);
-    toast.success(`${data.length} carteiras salvas com sucesso!`);
-  };
-
-  const handleClear = () => {
+  const handleClear = useCallback(() => {
     if (window.confirm('Tem certeza que deseja limpar todos os dados?')) {
       setRawData('');
       setParsedRows([]);
@@ -118,15 +144,16 @@ const OrcamentoPorCarteira = () => {
       setOrcadosPorCarteira([]);
       toast.success('Dados limpos!');
     }
-  };
+  }, [setOrcadosPorCarteira]);
 
-  // Calcular orçamento por agência
-  const calcularOrcamentoPorAgencia = () => {
+  // Calcular agregações usando useMemo para performance
+  const { orcamentosAgencia, porTipo, totalGeral } = useMemo(() => {
     const orcamentosAgencia = {};
+    const porTipo = {};
 
     orcadosPorCarteira.forEach(item => {
+      // Por agência
       const prefixo = item.prefixo;
-
       if (!orcamentosAgencia[prefixo]) {
         orcamentosAgencia[prefixo] = {
           prefixo,
@@ -134,60 +161,49 @@ const OrcamentoPorCarteira = () => {
           totalOrcadoBruto: 0,
           totalRealizado: 0,
           totalOrcadoEfetivo: 0,
-          carteiras: []
+          qtdCarteiras: 0
         };
       }
-
       orcamentosAgencia[prefixo].totalOrcadoBruto += item.orcadoBruto;
       orcamentosAgencia[prefixo].totalRealizado += item.realizado;
       orcamentosAgencia[prefixo].totalOrcadoEfetivo += item.orcadoEfetivo;
-      orcamentosAgencia[prefixo].carteiras.push({
-        carteira: item.carteira,
-        tipo: item.tipoCarteira,
-        orcadoBruto: item.orcadoBruto,
-        realizado: item.realizado,
-        orcadoEfetivo: item.orcadoEfetivo
-      });
-    });
+      orcamentosAgencia[prefixo].qtdCarteiras += 1;
 
-    return Object.values(orcamentosAgencia).sort((a, b) => a.prefixo.localeCompare(b.prefixo));
-  };
-
-  // Calcular orçamento por tipo × produto
-  const calcularPorTipoProduto = () => {
-    const resultado = {};
-
-    // Agrupar por tipo de carteira
-    const porTipo = {};
-    orcadosPorCarteira.forEach(item => {
+      // Por tipo
       const tipo = item.tipoCarteira;
       if (!porTipo[tipo]) {
-        porTipo[tipo] = [];
+        porTipo[tipo] = {
+          tipo,
+          qtdCarteiras: 0,
+          totalOrcadoBruto: 0,
+          totalRealizado: 0,
+          totalOrcadoEfetivo: 0
+        };
       }
-      porTipo[tipo].push(item);
+      porTipo[tipo].qtdCarteiras += 1;
+      porTipo[tipo].totalOrcadoBruto += item.orcadoBruto;
+      porTipo[tipo].totalRealizado += item.realizado;
+      porTipo[tipo].totalOrcadoEfetivo += item.orcadoEfetivo;
     });
 
-    // Para cada tipo, calcular total
-    Object.entries(porTipo).forEach(([tipo, carteiras]) => {
-      const totalOrcadoBruto = carteiras.reduce((sum, c) => sum + c.orcadoBruto, 0);
-      const totalRealizado = carteiras.reduce((sum, c) => sum + c.realizado, 0);
-      const totalOrcadoEfetivo = carteiras.reduce((sum, c) => sum + c.orcadoEfetivo, 0);
+    const agenciasList = Object.values(orcamentosAgencia).sort((a, b) => a.prefixo.localeCompare(b.prefixo));
+    const totalGeral = agenciasList.reduce((sum, a) => sum + a.totalOrcadoEfetivo, 0);
 
-      resultado[tipo] = {
-        tipo,
-        qtdCarteiras: carteiras.length,
-        totalOrcadoBruto,
-        totalRealizado,
-        totalOrcadoEfetivo
-      };
-    });
+    return {
+      orcamentosAgencia: agenciasList,
+      porTipo,
+      totalGeral
+    };
+  }, [orcadosPorCarteira]);
 
-    return resultado;
-  };
-
-  const orcamentosAgencia = calcularOrcamentoPorAgencia();
-  const porTipo = calcularPorTipoProduto();
-  const totalGeral = orcamentosAgencia.reduce((sum, a) => sum + a.totalOrcadoEfetivo, 0);
+  const requiredFields = [
+    { id: 'prefixo', label: 'Prefixo', mapped: columnMapping.prefixo !== undefined },
+    { id: 'agencia', label: 'Agência', mapped: columnMapping.agencia !== undefined },
+    { id: 'carteira', label: 'Carteira', mapped: columnMapping.carteira !== undefined },
+    { id: 'tipoCarteira', label: 'Tipo', mapped: columnMapping.tipoCarteira !== undefined },
+    { id: 'orcado', label: 'Orçado', mapped: columnMapping.orcado !== undefined },
+    { id: 'realizado', label: 'Realizado', mapped: columnMapping.realizado !== undefined }
+  ];
 
   return (
     <div>
