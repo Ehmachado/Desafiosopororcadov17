@@ -18,8 +18,8 @@ import { toast } from 'sonner';
 const RankingExport = () => {
   const [produtos] = useLocalStorage('challenge_produtos', []);
   const [carteiras] = useLocalStorage('carteiras_master', []);
-  const [orcadosPorTipo] = useLocalStorage('orcamento_por_tipo', {}); // NOVO FORMATO
-  const [orcadosPorCarteira] = useLocalStorage('orcados_por_carteira', []);
+  const [orcadosPorTipo] = useLocalStorage('orcamento_por_tipo', {}); // Campo 3
+  const [orcadosPorCarteiraV2] = useLocalStorage('orcados_por_carteira_v2', []); // Campo 3.1 NOVO
   const [redes] = useLocalStorage('redes', []);
   const [realizadosTipo] = useLocalStorage('realizados_tipo', []);
   const [realizadosCarteira] = useLocalStorage('realizados_carteira', []);
