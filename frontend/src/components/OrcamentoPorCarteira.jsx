@@ -575,7 +575,7 @@ const OrcamentoPorCarteira = () => {
                     <td>{agencia.agencia}</td>
                     {produtosArray.map(produto => (
                       <td key={produto} style={{ textAlign: 'right', fontWeight: 600, color: 'var(--bb-blue)' }}>
-                        {formatCurrency(agencia.totalPorProduto[produto] || 0)}
+                        {formatCurrency(agencia.orcadoEfetivoPorProduto[produto] || 0)}
                       </td>
                     ))}
                   </tr>
