@@ -103,11 +103,15 @@
 #====================================================================================================
 
 user_problem_statement: |
-  Remover Campo 7 (Controle Diário) e integrar funcionalidade diária nos Campos 5 e 6.
-  - Campo 5: Adicionar controle diário para realizado por tipo de seguro
-  - Campo 6: Adicionar controle diário para realizado por carteira
-  - Dados diários devem ser salvos separadamente com acumulado total
-  - Acumulado total deve ser usado no Campo 8 (Ranking)
+  Refazer Campo 3.1 (Orçamento Por % Atingimento) completamente do zero com as seguintes especificações:
+  - Textarea para colar planilha com detecção automática de colunas (Prefixo, Agência, Carteira, Tipo de Carteira, Orçado, Realizado)
+  - Suporte multi-produto: se Campo 1 tiver múltiplos produtos, deve ter colunas separadas para cada
+  - Controle de % Meta (slider 0-200%)
+  - Cálculo: Orçado Efetivo = (Orçado × % Meta / 100) - Realizado
+  - Exibir tabela com Orçado por Agência (soma das carteiras)
+  - Exibir tabela tipo de carteira × produto (similar ao Campo 3)
+  - Performance: não travar com 500+ linhas
+  - Integração com Campo 8: quando Campo 3 estiver vazio, usar dados do Campo 3.1
 
 backend:
   - task: "N/A - Only frontend changes"
