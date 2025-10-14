@@ -22,7 +22,8 @@ const OrcamentoPorCarteira = () => {
     { id: 'agencia', label: 'Agência/Dependência' },
     { id: 'carteira', label: 'Carteira' },
     { id: 'tipoCarteira', label: 'Tipo de Carteira' },
-    { id: 'valor', label: 'Orçado/Conexão' }
+    { id: 'orcado', label: 'Orçado' },
+    { id: 'realizado', label: 'Realizado' }
   ];
 
   useEffect(() => {
@@ -46,16 +47,18 @@ const OrcamentoPorCarteira = () => {
             autoMapping.prefixo = index;
           } else if (normalized.includes('agencia') || normalized.includes('agência') || normalized.includes('depend')) {
             autoMapping.agencia = index;
-          } else if (normalized.includes('carteira')) {
+          } else if (normalized.includes('carteira') && !normalized.includes('tipo')) {
             autoMapping.carteira = index;
           } else if (normalized.includes('tipo')) {
             autoMapping.tipoCarteira = index;
-          } else if (normalized.includes('orcado') || normalized.includes('orçado') || normalized.includes('conexao') || normalized.includes('conexão') || normalized.includes('valor')) {
-            autoMapping.valor = index;
+          } else if (normalized.includes('orcado') || normalized.includes('orçado') || normalized.includes('conexao') || normalized.includes('conexão')) {
+            autoMapping.orcado = index;
+          } else if (normalized.includes('realizado') || normalized.includes('realizada')) {
+            autoMapping.realizado = index;
           }
         });
 
-        if (Object.keys(autoMapping).length >= 4) {
+        if (Object.keys(autoMapping).length >= 5) {
           setColumnMapping(autoMapping);
           setShowMapper(false);
         } else {
@@ -79,15 +82,25 @@ const OrcamentoPorCarteira = () => {
       const agencia = row[columnMapping.agencia] || '';
       const carteira = row[columnMapping.carteira] || '';
       const tipoCarteira = row[columnMapping.tipoCarteira] || '';
-      const valorStr = row[columnMapping.valor] || '0';
+      const orcadoStr = row[columnMapping.orcado] || '0';
+      const realizadoStr = row[columnMapping.realizado] || '0';
 
       if (prefixo && carteira) {
+        const orcadoBruto = parseNumericValue(orcadoStr);
+        const realizado = parseNumericValue(realizadoStr);
+        
+        // Cálculo: (Orçado × % Meta / 100) - Realizado
+        const orcadoComMeta = orcadoBruto * (fatorMeta / 100);
+        const orcadoEfetivo = Math.max(0, orcadoComMeta - realizado);
+
         data.push({
           prefixo: prefixo.trim(),
           agencia: agencia.trim(),
           carteira: carteira.trim(),
           tipoCarteira: tipoCarteira.trim(),
-          valor: parseNumericValue(valorStr),
+          orcadoBruto: orcadoBruto,
+          realizado: realizado,
+          orcadoEfetivo: orcadoEfetivo,
           fatorMeta: fatorMeta
         });
       }
@@ -113,23 +126,27 @@ const OrcamentoPorCarteira = () => {
 
     orcadosPorCarteira.forEach(item => {
       const prefixo = item.prefixo;
-      const metaEfetiva = item.valor * (item.fatorMeta / 100);
 
       if (!orcamentosAgencia[prefixo]) {
         orcamentosAgencia[prefixo] = {
           prefixo,
           agencia: item.agencia,
-          total: 0,
+          totalOrcadoBruto: 0,
+          totalRealizado: 0,
+          totalOrcadoEfetivo: 0,
           carteiras: []
         };
       }
 
-      orcamentosAgencia[prefixo].total += metaEfetiva;
+      orcamentosAgencia[prefixo].totalOrcadoBruto += item.orcadoBruto;
+      orcamentosAgencia[prefixo].totalRealizado += item.realizado;
+      orcamentosAgencia[prefixo].totalOrcadoEfetivo += item.orcadoEfetivo;
       orcamentosAgencia[prefixo].carteiras.push({
         carteira: item.carteira,
         tipo: item.tipoCarteira,
-        orcado: item.valor,
-        meta: metaEfetiva
+        orcadoBruto: item.orcadoBruto,
+        realizado: item.realizado,
+        orcadoEfetivo: item.orcadoEfetivo
       });
     });
 
@@ -152,14 +169,16 @@ const OrcamentoPorCarteira = () => {
 
     // Para cada tipo, calcular total
     Object.entries(porTipo).forEach(([tipo, carteiras]) => {
-      const totalOrcado = carteiras.reduce((sum, c) => sum + c.valor, 0);
-      const totalMeta = carteiras.reduce((sum, c) => sum + (c.valor * (c.fatorMeta / 100)), 0);
+      const totalOrcadoBruto = carteiras.reduce((sum, c) => sum + c.orcadoBruto, 0);
+      const totalRealizado = carteiras.reduce((sum, c) => sum + c.realizado, 0);
+      const totalOrcadoEfetivo = carteiras.reduce((sum, c) => sum + c.orcadoEfetivo, 0);
 
       resultado[tipo] = {
         tipo,
         qtdCarteiras: carteiras.length,
-        totalOrcado,
-        totalMeta
+        totalOrcadoBruto,
+        totalRealizado,
+        totalOrcadoEfetivo
       };
     });
 
@@ -168,7 +187,7 @@ const OrcamentoPorCarteira = () => {
 
   const orcamentosAgencia = calcularOrcamentoPorAgencia();
   const porTipo = calcularPorTipoProduto();
-  const totalGeral = orcamentosAgencia.reduce((sum, a) => sum + a.total, 0);
+  const totalGeral = orcamentosAgencia.reduce((sum, a) => sum + a.totalOrcadoEfetivo, 0);
 
   return (
     <div>
