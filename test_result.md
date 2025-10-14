@@ -203,26 +203,27 @@ test_plan:
 agent_communication:
   - agent: "main"
     message: |
-      Implementation completed successfully:
+      Campo 3.1 recreated from scratch with comprehensive specifications:
       
-      ✅ Phase 1: Campo 7 removed from Dashboard
-      - Removed import and tab references
-      - Tab "Controle Diário" no longer appears
+      ✅ Phase 1: Created OrcamentoPorCarteira.jsx component
+      - Textarea for pasting tab-separated data (handles 500+ lines)
+      - Automatic column detection with manual override
+      - Multi-product support (separate Orçado/Realizado for each)
+      - Performance optimized with useMemo/useCallback
       
-      ✅ Phase 2: Campo 5 enhanced with daily control
-      - Day selector added (Dia 1 to diasDesafio)
-      - Daily data saved separately: realizados_tipo_diarios
-      - Accumulated total calculated and displayed
-      - UI shows "Realizado Total Acumulado até Dia X"
+      ✅ Phase 2: Implemented % Meta control
+      - Slider (0-200%) with input field
+      - Formula: Orçado Efetivo = (Orçado × % Meta / 100) - Realizado
+      - Recalculates all data when meta changes
       
-      ✅ Phase 3: Campo 6 enhanced with daily control
-      - Day selector added (Dia 1 to diasDesafio)
-      - Daily data saved separately: realizados_carteira_diarios
-      - Accumulated total calculated and displayed
-      - UI shows "Realizado Total Acumulado até Dia X"
+      ✅ Phase 3: Display tables
+      - Orçado por Agência (sum of carteiras per agency)
+      - Orçado por Tipo × Produto (grouped by type)
+      - Shows both original budget and effective budget
       
-      ✅ Phase 4: Campo 8 updated to use accumulated data
-      - Uses realizados_tipo_diarios and realizados_carteira_diarios
-      - Calculates ranking based on accumulated totals up to diaFiltro
+      ✅ Phase 4: Integration with Campo 8
+      - Updated calculations.js to support V2 format
+      - RankingExport correctly pulls from Campo 3.1 when Campo 3 is empty
+      - Per-product budget calculations working
       
-      All UI tests passed successfully. Application is ready for user testing.
+      Ready for comprehensive testing with real data.
