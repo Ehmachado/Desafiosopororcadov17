@@ -263,7 +263,7 @@ const OrcamentoPorCarteira = () => {
 
   // Calcular orçamento por tipo de carteira × produto (como Campo 3)
   const orcamentoPorTipo = useMemo(() => {
-    if (orcadosPorCarteira.length === 0 || produtosArray.length === 0) return [];
+    if (orcadosPorCarteira.length === 0) return [];
 
     const agrupado = {};
 
@@ -274,20 +274,21 @@ const OrcamentoPorCarteira = () => {
         agrupado[tipo] = {
           tipo,
           qtdCarteiras: 0,
-          totalPorProduto: {}
+          totalPorProduto: {},
+          orcadoEfetivoPorProduto: {}
         };
         
         produtosArray.forEach(produto => {
           agrupado[tipo].totalPorProduto[produto] = 0;
+          agrupado[tipo].orcadoEfetivoPorProduto[produto] = 0;
         });
       }
 
       agrupado[tipo].qtdCarteiras += 1;
 
-      // Distribuir o orçado efetivo igualmente entre todos os produtos
-      const orcadoPorProduto = item.orcadoEfetivo / produtosArray.length;
       produtosArray.forEach(produto => {
-        agrupado[tipo].totalPorProduto[produto] += orcadoPorProduto;
+        agrupado[tipo].totalPorProduto[produto] += item.orcadoPorProduto[produto] || 0;
+        agrupado[tipo].orcadoEfetivoPorProduto[produto] += item.orcadoEfetivoPorProduto[produto] || 0;
       });
     });
 
