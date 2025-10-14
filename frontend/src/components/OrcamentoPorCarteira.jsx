@@ -380,71 +380,43 @@ const OrcamentoPorCarteira = () => {
                       ))}
                     </select>
                   </div>
-                </div>
 
-                {/* Mapeamento de Orçado e Realizado por Produto */}
-                {produtosArray.length > 0 && (
-                  <div style={{ marginTop: '16px' }}>
-                    <h4 style={{ fontSize: '14px', fontWeight: 600, marginBottom: '12px', color: 'var(--bb-blue)' }}>
-                      Orçado e Realizado por Produto
-                    </h4>
-                    
-                    {produtosArray.map(produto => (
-                      <div key={produto} style={{ 
-                        marginBottom: '12px', 
-                        padding: '12px', 
-                        background: 'white', 
-                        borderRadius: '6px',
-                        border: '1px solid #e0e0e0'
-                      }}>
-                        <p style={{ fontSize: '13px', fontWeight: 600, marginBottom: '8px', color: '#333' }}>
-                          {produto}
-                        </p>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                          <div>
-                            <label style={{ display: 'block', fontSize: '11px', marginBottom: '4px', color: '#666' }}>
-                              Orçado
-                            </label>
-                            <select
-                              value={columnMapping.orcado[produto] || ''}
-                              onChange={(e) => setColumnMapping(prev => ({
-                                ...prev,
-                                orcado: { ...prev.orcado, [produto]: e.target.value }
-                              }))}
-                              className="bb-input"
-                              style={{ fontSize: '12px' }}
-                            >
-                              <option value="">-- Selecione --</option>
-                              {headers.map((h, idx) => (
-                                <option key={idx} value={idx}>{h}</option>
-                              ))}
-                            </select>
-                          </div>
-
-                          <div>
-                            <label style={{ display: 'block', fontSize: '11px', marginBottom: '4px', color: '#666' }}>
-                              Realizado
-                            </label>
-                            <select
-                              value={columnMapping.realizado[produto] || ''}
-                              onChange={(e) => setColumnMapping(prev => ({
-                                ...prev,
-                                realizado: { ...prev.realizado, [produto]: e.target.value }
-                              }))}
-                              className="bb-input"
-                              style={{ fontSize: '12px' }}
-                            >
-                              <option value="">-- Selecione --</option>
-                              {headers.map((h, idx) => (
-                                <option key={idx} value={idx}>{h}</option>
-                              ))}
-                            </select>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                  {/* Orçado */}
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '4px' }}>
+                      Orçado/Conexão *
+                    </label>
+                    <select
+                      value={columnMapping.orcado}
+                      onChange={(e) => setColumnMapping(prev => ({ ...prev, orcado: e.target.value }))}
+                      className="bb-input"
+                      style={{ fontSize: '12px' }}
+                    >
+                      <option value="">-- Selecione --</option>
+                      {headers.map((h, idx) => (
+                        <option key={idx} value={idx}>{h}</option>
+                      ))}
+                    </select>
                   </div>
-                )}
+
+                  {/* Realizado */}
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '4px' }}>
+                      Realizado
+                    </label>
+                    <select
+                      value={columnMapping.realizado}
+                      onChange={(e) => setColumnMapping(prev => ({ ...prev, realizado: e.target.value }))}
+                      className="bb-input"
+                      style={{ fontSize: '12px' }}
+                    >
+                      <option value="">-- Selecione --</option>
+                      {headers.map((h, idx) => (
+                        <option key={idx} value={idx}>{h}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
 
                 <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
                   <button onClick={handleSalvarDados} className="bb-btn bb-btn-primary">
