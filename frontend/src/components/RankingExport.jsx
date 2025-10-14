@@ -122,8 +122,8 @@ const RankingExport = () => {
         const redeInfo = redes.find(r => r.prefixo === prefixo);
         const rede = redeInfo?.rede || 'Sem Rede';
 
-        // SEMPRE passar orcadosPorCarteira, a função decide automaticamente
-        // Se Campo 3 (orcamento_por_tipo) estiver vazio, usa Campo 3.1 (orcados_por_carteira)
+        // SEMPRE passar orcadosPorCarteiraV2, a função decide automaticamente
+        // Se Campo 3 (orcamento_por_tipo) estiver vazio, usa Campo 3.1 (orcados_por_carteira_v2)
         const useCarteiraBase = baseCalculo === 'carteira';
         
         // LOG PARA DEBUG
@@ -132,13 +132,13 @@ const RankingExport = () => {
             baseCalculo,
             useCarteiraBase,
             temOrcadosPorTipo: orcadosPorTipo && Object.keys(orcadosPorTipo).length > 0,
-            temOrcadosPorCarteira: orcadosPorCarteira && orcadosPorCarteira.length > 0,
+            temOrcadosPorCarteiraV2: orcadosPorCarteiraV2 && orcadosPorCarteiraV2.length > 0,
             orcadosPorTipo,
-            orcadosPorCarteiraLength: orcadosPorCarteira?.length
+            orcadosPorCarteiraV2Length: orcadosPorCarteiraV2?.length
           });
         }
         
-        const orcado = calculateOrcadoPorAgencia(prefixo, carteiras, orcadosPorTipo, orcadosPorCarteira, useCarteiraBase);
+        const orcado = calculateOrcadoPorAgencia(prefixo, carteiras, orcadosPorTipo, orcadosPorCarteiraV2, useCarteiraBase);
 
         const atingimentos = {};
         const valores = {};
