@@ -190,10 +190,12 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Remove Campo 7 from Dashboard"
-    - "Daily control integration in Campo 5"
-    - "Daily control integration in Campo 6"
-    - "Ranking calculation with accumulated data"
+    - "Create new OrcamentoPorCarteira.jsx (Campo 3.1)"
+    - "Update calculations.js for Campo 3.1 V2"
+    - "Update RankingExport.jsx integration"
+    - "Test data paste and column mapping"
+    - "Test % Meta slider and recalculation"
+    - "Test Campo 8 fallback to Campo 3.1"
   stuck_tasks: []
   test_all: true
   test_priority: "high_first"
