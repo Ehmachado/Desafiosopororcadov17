@@ -615,7 +615,7 @@ const OrcamentoPorCarteira = () => {
                     <td>{tipo.qtdCarteiras} carteiras</td>
                     {produtosArray.map(produto => (
                       <td key={produto} style={{ textAlign: 'right', fontWeight: 600, color: 'var(--bb-blue)' }}>
-                        {formatCurrency(tipo.totalPorProduto[produto] || 0)}
+                        {formatCurrency(tipo.orcadoEfetivoPorProduto[produto] || 0)}
                       </td>
                     ))}
                   </tr>
