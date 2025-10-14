@@ -231,7 +231,7 @@ const OrcamentoPorCarteira = () => {
 
   // Calcular orçamento por agência (soma das carteiras)
   const orcamentoPorAgencia = useMemo(() => {
-    if (orcadosPorCarteira.length === 0 || produtosArray.length === 0) return [];
+    if (orcadosPorCarteira.length === 0) return [];
 
     const agrupado = {};
 
@@ -242,18 +242,19 @@ const OrcamentoPorCarteira = () => {
         agrupado[key] = {
           prefixo: item.prefixo,
           agencia: item.agencia,
-          totalPorProduto: {}
+          totalPorProduto: {},
+          orcadoEfetivoPorProduto: {}
         };
         
         produtosArray.forEach(produto => {
           agrupado[key].totalPorProduto[produto] = 0;
+          agrupado[key].orcadoEfetivoPorProduto[produto] = 0;
         });
       }
 
-      // Distribuir o orçado efetivo igualmente entre todos os produtos
-      const orcadoPorProduto = item.orcadoEfetivo / produtosArray.length;
       produtosArray.forEach(produto => {
-        agrupado[key].totalPorProduto[produto] += orcadoPorProduto;
+        agrupado[key].totalPorProduto[produto] += item.orcadoPorProduto[produto] || 0;
+        agrupado[key].orcadoEfetivoPorProduto[produto] += item.orcadoEfetivoPorProduto[produto] || 0;
       });
     });
 
