@@ -1,6 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export const useLocalStorage = (key, initialValue) => {
+  // Ref to track if this is the first render
+  const isFirstRender = useRef(true);
+  
   const [storedValue, setStoredValue] = useState(() => {
     try {
       const item = window.localStorage.getItem(key);
@@ -12,6 +15,12 @@ export const useLocalStorage = (key, initialValue) => {
   });
 
   useEffect(() => {
+    // Skip writing to localStorage on first render to prevent StrictMode double-write
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    
     try {
       window.localStorage.setItem(key, JSON.stringify(storedValue));
     } catch (error) {
