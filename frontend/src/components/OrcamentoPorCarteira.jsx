@@ -125,8 +125,14 @@ const OrcamentoPorCarteira = () => {
     }
 
     // Validar mapeamento essencial
-    if (!columnMapping.prefixo || !columnMapping.carteira || !columnMapping.orcado) {
-      toast.error('Mapeie pelo menos as colunas Prefixo, Carteira e Orçado');
+    if (!columnMapping.prefixo || !columnMapping.carteira) {
+      toast.error('Mapeie pelo menos as colunas Prefixo e Carteira');
+      return;
+    }
+
+    // Se houver produtos, deve ter pelo menos uma coluna de orçado
+    if (produtosArray.length > 0 && Object.keys(columnMapping.orcado).length === 0) {
+      toast.error('Mapeie pelo menos uma coluna de Orçado para os produtos');
       return;
     }
 
@@ -142,28 +148,41 @@ const OrcamentoPorCarteira = () => {
 
       if (!prefixo || !carteira) return; // Pula se não tiver essenciais
 
-      // Orçado e Realizado
-      const orcadoValor = parseNumericValue(row[parseInt(columnMapping.orcado)]) || 0;
-      const realizadoValor = columnMapping.realizado ? (parseNumericValue(row[parseInt(columnMapping.realizado)]) || 0) : 0;
+      const orcadoPorProduto = {};
+      const realizadoPorProduto = {};
+      const orcadoEfetivoPorProduto = {};
 
-      // Orçado Efetivo = (Orçado × Meta% / 100) - Realizado
-      const orcadoEfetivo = Math.max(0, (orcadoValor * metaPercentual / 100) - realizadoValor);
+      produtosArray.forEach(produto => {
+        // Orçado
+        const orcadoColIdx = columnMapping.orcado[produto];
+        const orcadoValor = orcadoColIdx ? parseNumericValue(row[parseInt(orcadoColIdx)]) : 0;
+        orcadoPorProduto[produto] = orcadoValor;
+
+        // Realizado
+        const realizadoColIdx = columnMapping.realizado[produto];
+        const realizadoValor = realizadoColIdx ? parseNumericValue(row[parseInt(realizadoColIdx)]) : 0;
+        realizadoPorProduto[produto] = realizadoValor;
+
+        // Orçado Efetivo = (Orçado × Meta% / 100) - Realizado
+        const orcadoEfetivo = Math.max(0, (orcadoValor * metaPercentual / 100) - realizadoValor);
+        orcadoEfetivoPorProduto[produto] = orcadoEfetivo;
+      });
 
       processedData.push({
         prefixo,
         agencia,
         carteira,
         tipoCarteira,
-        orcado: orcadoValor,
-        realizado: realizadoValor,
-        orcadoEfetivo,
+        orcadoPorProduto,
+        realizadoPorProduto,
+        orcadoEfetivoPorProduto,
         metaPercentual
       });
     });
 
     setOrcadosPorCarteira(processedData);
     toast.success(`${processedData.length} carteiras processadas e salvas!`);
-  }, [parsedRows, columnMapping, metaPercentual, setOrcadosPorCarteira]);
+  }, [parsedRows, columnMapping, produtosArray, metaPercentual, setOrcadosPorCarteira]);
 
   // Função para limpar todos os dados
   const handleLimparDados = useCallback(() => {
