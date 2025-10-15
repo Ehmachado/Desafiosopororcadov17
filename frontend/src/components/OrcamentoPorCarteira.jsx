@@ -9,23 +9,12 @@ const OrcamentoPorCarteira = () => {
   const [produtos] = useLocalStorage('challenge_produtos', []);
   const [challengeDias] = useLocalStorage('challenge_dias', 30);
   const [orcadosPorCarteira, setOrcadosPorCarteira] = useLocalStorage('orcados_por_carteira_v2', []);
-  const [metaPercentual, setMetaPercentual] = useLocalStorage('meta_percentual_desafio', 100);
   
-  // Estados locais
-  const [pastedData, setPastedData] = useState('');
-  const [parsedRows, setParsedRows] = useState([]);
-  const [headers, setHeaders] = useState([]);
+  // Dia atual GERAL
   const [diaAtual, setDiaAtual] = useState(1);
-  const [columnMapping, setColumnMapping] = useState({
-    prefixo: '',
-    agencia: '',
-    carteira: '',
-    tipoCarteira: '',
-    orcado: {},
-    realizado: {}
-  });
   
-  const [tempMetaPercentual, setTempMetaPercentual] = useState(metaPercentual);
+  // Estado por produto: { produto: { pastedData, parsedRows, headers, columnMapping, metaPercentual } }
+  const [estadoPorProduto, setEstadoPorProduto] = useState({});
 
   // Produtos em array garantido
   const produtosArray = useMemo(() => 
@@ -33,7 +22,34 @@ const OrcamentoPorCarteira = () => {
     [produtos]
   );
 
-  // Se não houver produtos, mostrar mensagem
+  // Inicializar estado para cada produto
+  useEffect(() => {
+    const novoEstado = {};
+    produtosArray.forEach(produto => {
+      if (!estadoPorProduto[produto]) {
+        novoEstado[produto] = {
+          pastedData: '',
+          parsedRows: [],
+          headers: [],
+          columnMapping: {
+            prefixo: '',
+            agencia: '',
+            carteira: '',
+            tipoCarteira: '',
+            orcado: '',
+            realizado: ''
+          },
+          metaPercentual: 100
+        };
+      }
+    });
+    
+    if (Object.keys(novoEstado).length > 0) {
+      setEstadoPorProduto(prev => ({ ...prev, ...novoEstado }));
+    }
+  }, [produtosArray]);
+
+  // Se não houver produtos
   if (produtosArray.length === 0) {
     return (
       <div className="bb-card">
@@ -48,24 +64,22 @@ const OrcamentoPorCarteira = () => {
     );
   }
 
-  // Função para parsear dados colados
-  const handlePasteData = useCallback(() => {
-    if (!pastedData.trim()) {
+  // Função para parsear dados de um produto
+  const handlePasteDataProduto = useCallback((produto) => {
+    const estado = estadoPorProduto[produto];
+    if (!estado || !estado.pastedData.trim()) {
       toast.error('Cole os dados na área de texto primeiro');
       return;
     }
 
-    const lines = pastedData.trim().split('\n');
+    const lines = estado.pastedData.trim().split('\n');
     if (lines.length < 2) {
       toast.error('Dados insuficientes. Cole pelo menos uma linha de cabeçalho e uma de dados.');
       return;
     }
 
     const headerLine = lines[0].split('\t');
-    setHeaders(headerLine);
-
     const rows = lines.slice(1).map(line => line.split('\t'));
-    setParsedRows(rows);
 
     // Auto-detect columns
     const autoMapping = {
@@ -73,8 +87,8 @@ const OrcamentoPorCarteira = () => {
       agencia: '',
       carteira: '',
       tipoCarteira: '',
-      orcado: {},
-      realizado: {}
+      orcado: '',
+      realizado: ''
     };
 
     headerLine.forEach((header, idx) => {
@@ -94,134 +108,116 @@ const OrcamentoPorCarteira = () => {
       if (headerLower.includes('tipo') && headerLower.includes('carteira')) {
         autoMapping.tipoCarteira = idx.toString();
       }
-      
-      produtosArray.forEach(produto => {
-        const produtoLower = produto.toLowerCase();
-        
-        if ((headerLower.includes('orçado') || headerLower.includes('orcado') || 
-             headerLower.includes('conexão') || headerLower.includes('conexao')) && 
-            headerLower.includes(produtoLower)) {
-          autoMapping.orcado[produto] = idx.toString();
-        }
-        
-        if (headerLower.includes('realizado') && headerLower.includes(produtoLower)) {
-          autoMapping.realizado[produto] = idx.toString();
-        }
-      });
+      if (headerLower.includes('orçado') || headerLower.includes('orcado') || 
+          headerLower.includes('conexão') || headerLower.includes('conexao')) {
+        if (!autoMapping.orcado) autoMapping.orcado = idx.toString();
+      }
+      if (headerLower.includes('realizado')) {
+        if (!autoMapping.realizado) autoMapping.realizado = idx.toString();
+      }
     });
 
-    setColumnMapping(autoMapping);
-    toast.success(`${rows.length} linhas carregadas com sucesso!`);
-  }, [pastedData, produtosArray]);
+    setEstadoPorProduto(prev => ({
+      ...prev,
+      [produto]: {
+        ...prev[produto],
+        headers: headerLine,
+        parsedRows: rows,
+        columnMapping: autoMapping
+      }
+    }));
 
-  // Função para salvar dados
-  const handleSalvarDados = useCallback(() => {
-    if (parsedRows.length === 0) {
+    toast.success(`${produto}: ${rows.length} linhas carregadas!`);
+  }, [estadoPorProduto]);
+
+  // Função para salvar dados de um produto
+  const handleSalvarDadosProduto = useCallback((produto) => {
+    const estado = estadoPorProduto[produto];
+    if (!estado || estado.parsedRows.length === 0) {
       toast.error('Carregue os dados primeiro');
       return;
     }
 
-    if (!columnMapping.prefixo || !columnMapping.carteira) {
+    if (!estado.columnMapping.prefixo || !estado.columnMapping.carteira) {
       toast.error('Mapeie pelo menos as colunas Prefixo e Carteira');
       return;
     }
 
-    if (produtosArray.length > 0 && Object.keys(columnMapping.orcado || {}).length === 0) {
-      toast.error('Mapeie pelo menos uma coluna de Orçado para os produtos');
+    if (!estado.columnMapping.orcado) {
+      toast.error('Mapeie a coluna de Orçado');
       return;
     }
 
     const processedData = [];
 
-    parsedRows.forEach((row) => {
+    estado.parsedRows.forEach((row) => {
       if (row.length < 2) return;
 
-      const prefixo = row[parseInt(columnMapping.prefixo)] || '';
-      const agencia = columnMapping.agencia ? row[parseInt(columnMapping.agencia)] : '';
-      const carteira = row[parseInt(columnMapping.carteira)] || '';
-      const tipoCarteira = columnMapping.tipoCarteira ? row[parseInt(columnMapping.tipoCarteira)] : '';
+      const prefixo = row[parseInt(estado.columnMapping.prefixo)] || '';
+      const agencia = estado.columnMapping.agencia ? row[parseInt(estado.columnMapping.agencia)] : '';
+      const carteira = row[parseInt(estado.columnMapping.carteira)] || '';
+      const tipoCarteira = estado.columnMapping.tipoCarteira ? row[parseInt(estado.columnMapping.tipoCarteira)] : '';
 
       if (!prefixo || !carteira) return;
 
-      const orcadoPorProduto = {};
-      const realizadoPorProduto = {};
-      const orcadoEfetivoPorProduto = {};
+      const orcadoValor = parseNumericValue(row[parseInt(estado.columnMapping.orcado)]) || 0;
+      const realizadoValor = estado.columnMapping.realizado ? 
+        (parseNumericValue(row[parseInt(estado.columnMapping.realizado)]) || 0) : 0;
 
-      produtosArray.forEach(produto => {
-        const orcadoColIdx = columnMapping.orcado?.[produto];
-        const orcadoValor = orcadoColIdx ? parseNumericValue(row[parseInt(orcadoColIdx)]) : 0;
-        orcadoPorProduto[produto] = orcadoValor;
-
-        const realizadoColIdx = columnMapping.realizado?.[produto];
-        const realizadoValor = realizadoColIdx ? parseNumericValue(row[parseInt(realizadoColIdx)]) : 0;
-        realizadoPorProduto[produto] = realizadoValor;
-
-        const orcadoEfetivo = Math.max(0, (orcadoValor * metaPercentual / 100) - realizadoValor);
-        orcadoEfetivoPorProduto[produto] = orcadoEfetivo;
-      });
+      // Orçado Efetivo = (Orçado × Meta% / 100) - Realizado
+      const orcadoEfetivo = Math.max(0, (orcadoValor * estado.metaPercentual / 100) - realizadoValor);
 
       processedData.push({
         prefixo,
         agencia,
         carteira,
         tipoCarteira,
-        orcadoPorProduto,
-        realizadoPorProduto,
-        orcadoEfetivoPorProduto,
-        metaPercentual,
+        produto,
+        orcado: orcadoValor,
+        realizado: realizadoValor,
+        orcadoEfetivo,
+        metaPercentual: estado.metaPercentual,
         dia: diaAtual
       });
     });
 
-    // Remover dados do mesmo dia e adicionar novos
-    const dadosOutrosDias = orcadosPorCarteira.filter(item => item.dia !== diaAtual);
-    setOrcadosPorCarteira([...dadosOutrosDias, ...processedData]);
-    toast.success(`${processedData.length} carteiras do Dia ${diaAtual} salvas!`);
-  }, [parsedRows, columnMapping, produtosArray, metaPercentual, diaAtual, orcadosPorCarteira, setOrcadosPorCarteira]);
-
-  // Função para limpar dados
-  const handleLimparDados = useCallback(() => {
-    if (window.confirm('Tem certeza que deseja limpar todos os dados do Campo 3.1?')) {
-      setOrcadosPorCarteira([]);
-      setPastedData('');
-      setParsedRows([]);
-      setHeaders([]);
-      setColumnMapping({
-        prefixo: '',
-        agencia: '',
-        carteira: '',
-        tipoCarteira: '',
-        orcado: {},
-        realizado: {}
-      });
-      toast.success('Dados limpos com sucesso!');
-    }
-  }, [setOrcadosPorCarteira]);
-
-  // Função para atualizar meta
-  const handleSalvarMeta = useCallback(() => {
-    setMetaPercentual(tempMetaPercentual);
+    // Remover dados do mesmo dia e mesmo produto, adicionar novos
+    const dadosOutros = orcadosPorCarteira.filter(item => 
+      !(item.dia === diaAtual && item.produto === produto)
+    );
     
-    const updatedData = orcadosPorCarteira.map(item => {
-      const orcadoEfetivoPorProduto = {};
+    setOrcadosPorCarteira([...dadosOutros, ...processedData]);
+    toast.success(`${produto} - Dia ${diaAtual}: ${processedData.length} carteiras salvas!`);
+  }, [estadoPorProduto, diaAtual, orcadosPorCarteira, setOrcadosPorCarteira]);
+
+  // Função para limpar todos os dados
+  const handleLimparTudo = useCallback(() => {
+    if (window.confirm('Tem certeza que deseja limpar TODOS os dados do Campo 3.1?')) {
+      setOrcadosPorCarteira([]);
       
+      // Limpar estado de cada produto
+      const novoEstado = {};
       produtosArray.forEach(produto => {
-        const orcadoValor = item.orcadoPorProduto?.[produto] || 0;
-        const realizadoValor = item.realizadoPorProduto?.[produto] || 0;
-        const orcadoEfetivo = Math.max(0, (orcadoValor * tempMetaPercentual / 100) - realizadoValor);
-        orcadoEfetivoPorProduto[produto] = orcadoEfetivo;
+        novoEstado[produto] = {
+          pastedData: '',
+          parsedRows: [],
+          headers: [],
+          columnMapping: {
+            prefixo: '',
+            agencia: '',
+            carteira: '',
+            tipoCarteira: '',
+            orcado: '',
+            realizado: ''
+          },
+          metaPercentual: 100
+        };
       });
-
-      return {
-        ...item,
-        orcadoEfetivoPorProduto,
-        metaPercentual: tempMetaPercentual
-      };
-    });
-
-    setOrcadosPorCarteira(updatedData);
-    toast.success('Meta atualizada e orçamentos recalculados!');
-  }, [tempMetaPercentual, setMetaPercentual, orcadosPorCarteira, setOrcadosPorCarteira, produtosArray]);
+      setEstadoPorProduto(novoEstado);
+      
+      toast.success('Todos os dados limpos!');
+    }
+  }, [setOrcadosPorCarteira, produtosArray]);
 
   // Calcular totais por agência
   const orcamentoPorAgencia = useMemo(() => {
@@ -244,9 +240,8 @@ const OrcamentoPorCarteira = () => {
         });
       }
 
-      produtosArray.forEach(produto => {
-        agrupado[key].orcadoEfetivoPorProduto[produto] += item.orcadoEfetivoPorProduto?.[produto] || 0;
-      });
+      agrupado[key].orcadoEfetivoPorProduto[item.produto] = 
+        (agrupado[key].orcadoEfetivoPorProduto[item.produto] || 0) + item.orcadoEfetivo;
     });
 
     return Object.values(agrupado).sort((a, b) => a.prefixo.localeCompare(b.prefixo));
@@ -264,7 +259,7 @@ const OrcamentoPorCarteira = () => {
       if (!agrupado[tipo]) {
         agrupado[tipo] = {
           tipo,
-          qtdCarteiras: 0,
+          qtdCarteiras: new Set(),
           orcadoEfetivoPorProduto: {}
         };
         
@@ -273,307 +268,305 @@ const OrcamentoPorCarteira = () => {
         });
       }
 
-      agrupado[tipo].qtdCarteiras += 1;
-
-      produtosArray.forEach(produto => {
-        agrupado[tipo].orcadoEfetivoPorProduto[produto] += item.orcadoEfetivoPorProduto?.[produto] || 0;
-      });
+      agrupado[tipo].qtdCarteiras.add(`${item.prefixo}-${item.carteira}`);
+      agrupado[tipo].orcadoEfetivoPorProduto[item.produto] = 
+        (agrupado[tipo].orcadoEfetivoPorProduto[item.produto] || 0) + item.orcadoEfetivo;
     });
 
-    return Object.values(agrupado).sort((a, b) => a.tipo.localeCompare(b.tipo));
+    return Object.values(agrupado).map(g => ({
+      ...g,
+      qtdCarteiras: g.qtdCarteiras.size
+    })).sort((a, b) => a.tipo.localeCompare(b.tipo));
+  }, [orcadosPorCarteira, produtosArray]);
+
+  // Consolidar dados por produto para mostrar na interface
+  const dadosPorProduto = useMemo(() => {
+    const consolidado = {};
+    
+    produtosArray.forEach(produto => {
+      consolidado[produto] = orcadosPorCarteira.filter(item => item.produto === produto);
+    });
+    
+    return consolidado;
   }, [orcadosPorCarteira, produtosArray]);
 
   return (
     <div>
-      {/* Seção 1: Carregar Dados */}
+      {/* Controle de Dia GERAL */}
       <div className="bb-card">
         <div className="bb-card-header">
           <h2 className="bb-card-title">Campo 3.1 — Orçamento Por % Atingimento (por Carteira)</h2>
           <p className="bb-card-subtitle">
-            Cole dados da planilha com orçado e realizado por carteira e produto
+            Configure o orçamento por carteira para cada produto separadamente
           </p>
         </div>
 
-        {/* Controle de Dia */}
-        <div style={{ marginBottom: '16px', padding: '16px', background: '#e3f2fd', borderRadius: '8px' }}>
-          <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-            <Calendar size={20} color="#1976d2" />
-            <div>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, marginBottom: '4px' }}>
-                Dia do Desafio:
-              </label>
-              <select
-                value={diaAtual}
-                onChange={(e) => setDiaAtual(Number(e.target.value))}
-                className="bb-input"
-                style={{ maxWidth: '150px' }}
-              >
-                {Array.from({ length: challengeDias }, (_, i) => i + 1).map(dia => (
-                  <option key={dia} value={dia}>Dia {dia}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <div style={{ marginBottom: '16px' }}>
-          <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>
-            Cole os dados (separados por TAB):
-          </label>
-          <textarea
-            value={pastedData}
-            onChange={(e) => setPastedData(e.target.value)}
-            placeholder="Cole aqui os dados copiados do Excel/Sheets...&#10;Exemplo (múltiplos produtos):&#10;Prefixo	Agência	Carteira	Tipo	Orçado Vida	Realizado Vida	Orçado Prestamista	Realizado Prestamista&#10;0001	Central	001	PF	5000	3000	8000	6000"
-            className="bb-input"
-            style={{ 
-              minHeight: '120px', 
-              fontFamily: 'monospace', 
-              fontSize: '12px',
-              whiteSpace: 'pre',
-              overflowX: 'auto'
-            }}
-          />
-        </div>
-
-        <button onClick={handlePasteData} className="bb-btn bb-btn-primary">
-          <Upload size={16} />
-          Carregar e Detectar Colunas
-        </button>
-
-        {/* Mapeamento de Colunas */}
-        {headers.length > 0 && (
-          <div style={{ marginTop: '24px' }}>
-            <h3 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '12px' }}>
-              Mapeamento de Colunas
-            </h3>
-            
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '16px' }}>
-              {['prefixo', 'agencia', 'carteira', 'tipoCarteira'].map(field => (
-                <div key={field}>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '4px' }}>
-                    {field === 'prefixo' ? 'Prefixo *' : 
-                     field === 'agencia' ? 'Agência/Dependência' :
-                     field === 'carteira' ? 'Carteira *' : 
-                     'Tipo de Carteira'}
-                  </label>
-                  <select
-                    value={columnMapping[field]}
-                    onChange={(e) => setColumnMapping(prev => ({ ...prev, [field]: e.target.value }))}
-                    className="bb-input"
-                    style={{ fontSize: '12px' }}
-                  >
-                    <option value="">-- Selecione --</option>
-                    {headers.map((h, idx) => (
-                      <option key={idx} value={idx}>{h}</option>
-                    ))}
-                  </select>
-                </div>
-              ))}
-            </div>
-
-            {/* Mapeamento por Produto */}
-            {produtosArray.length > 0 && (
-              <div style={{ marginTop: '16px' }}>
-                <h4 style={{ fontSize: '14px', fontWeight: 600, marginBottom: '12px', color: 'var(--bb-blue)' }}>
-                  Orçado e Realizado por Produto
-                </h4>
-                
-                {produtosArray.map(produto => (
-                  <div key={produto} style={{ 
-                    marginBottom: '12px', 
-                    padding: '12px', 
-                    background: 'white', 
-                    borderRadius: '6px',
-                    border: '1px solid #e0e0e0'
-                  }}>
-                    <p style={{ fontSize: '13px', fontWeight: 600, marginBottom: '8px', color: '#333' }}>
-                      {produto}
-                    </p>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '11px', marginBottom: '4px', color: '#666' }}>
-                          Orçado
-                        </label>
-                        <select
-                          value={columnMapping.orcado?.[produto] || ''}
-                          onChange={(e) => setColumnMapping(prev => ({
-                            ...prev,
-                            orcado: { ...(prev.orcado || {}), [produto]: e.target.value }
-                          }))}
-                          className="bb-input"
-                          style={{ fontSize: '12px' }}
-                        >
-                          <option value="">-- Selecione --</option>
-                          {headers.map((h, idx) => (
-                            <option key={idx} value={idx}>{h}</option>
-                          ))}
-                        </select>
-                      </div>
-
-                      <div>
-                        <label style={{ display: 'block', fontSize: '11px', marginBottom: '4px', color: '#666' }}>
-                          Realizado
-                        </label>
-                        <select
-                          value={columnMapping.realizado?.[produto] || ''}
-                          onChange={(e) => setColumnMapping(prev => ({
-                            ...prev,
-                            realizado: { ...(prev.realizado || {}), [produto]: e.target.value }
-                          }))}
-                          className="bb-input"
-                          style={{ fontSize: '12px' }}
-                        >
-                          <option value="">-- Selecione --</option>
-                          {headers.map((h, idx) => (
-                            <option key={idx} value={idx}>{h}</option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+        <div style={{ marginBottom: '16px', padding: '16px', background: 'linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)', borderRadius: '8px', border: '2px solid #2196f3' }}>
+          <div style={{ display: 'flex', gap: '16px', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              <Calendar size={24} color="#1565c0" />
+              <div>
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, marginBottom: '4px', color: '#1565c0' }}>
+                  Dia do Desafio Atual:
+                </label>
+                <select
+                  value={diaAtual}
+                  onChange={(e) => setDiaAtual(Number(e.target.value))}
+                  className="bb-input"
+                  style={{ maxWidth: '150px', fontSize: '16px', fontWeight: 600 }}
+                >
+                  {Array.from({ length: challengeDias }, (_, i) => i + 1).map(dia => (
+                    <option key={dia} value={dia}>Dia {dia}</option>
+                  ))}
+                </select>
               </div>
-            )}
-
-            <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
-              <button onClick={handleSalvarDados} className="bb-btn bb-btn-primary">
-                <Save size={16} />
-                Salvar Dia {diaAtual}
-              </button>
-              <button onClick={handleLimparDados} className="bb-btn" style={{ background: '#dc3545', color: 'white' }}>
-                <Trash2 size={16} />
-                Limpar Tudo
-              </button>
             </div>
-          </div>
-        )}
-      </div>
-
-      {/* Seção 2: Controle de % Meta */}
-      {orcadosPorCarteira.length > 0 && (
-        <div className="bb-card">
-          <div className="bb-card-header">
-            <h2 className="bb-card-title">% Meta do Desafio</h2>
-            <p className="bb-card-subtitle">Ajuste o percentual de meta aplicado aos orçamentos</p>
-          </div>
-
-          <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-            <div style={{ flex: 1 }}>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>
-                Percentual: {tempMetaPercentual}%
-              </label>
-              <input
-                type="range"
-                min="0"
-                max="200"
-                value={tempMetaPercentual}
-                onChange={(e) => setTempMetaPercentual(Number(e.target.value))}
-                style={{ width: '100%' }}
-              />
-            </div>
-            <button onClick={handleSalvarMeta} className="bb-btn bb-btn-primary">
-              <Save size={16} />
-              Aplicar Meta
+            
+            <button onClick={handleLimparTudo} className="bb-btn" style={{ background: '#dc3545', color: 'white' }}>
+              <Trash2 size={16} />
+              Limpar Tudo
             </button>
           </div>
         </div>
-      )}
+      </div>
 
-      {/* Seção 3: Orçamento por Agência */}
+      {/* Seção para cada produto */}
+      {produtosArray.map((produto, produtoIdx) => {
+        const estado = estadoPorProduto[produto] || {};
+        const dadosDoProduto = dadosPorProduto[produto] || [];
+        
+        return (
+          <div key={produto} className="bb-card" style={{ borderLeft: `4px solid ${['#1976d2', '#f57c00', '#388e3c', '#7b1fa2'][produtoIdx % 4]}` }}>
+            <div className="bb-card-header" style={{ background: `${['#e3f2fd', '#fff3e0', '#e8f5e9', '#f3e5f5'][produtoIdx % 4]}` }}>
+              <h2 className="bb-card-title" style={{ color: `${['#1565c0', '#e65100', '#2e7d32', '#6a1b9a'][produtoIdx % 4]}` }}>
+                {produto}
+              </h2>
+              <p className="bb-card-subtitle">
+                Cole a planilha específica para {produto}
+              </p>
+            </div>
+
+            {/* Textarea */}
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>
+                Cole os dados (separados por TAB):
+              </label>
+              <textarea
+                value={estado.pastedData || ''}
+                onChange={(e) => setEstadoPorProduto(prev => ({
+                  ...prev,
+                  [produto]: { ...prev[produto], pastedData: e.target.value }
+                }))}
+                placeholder={`Cole aqui dados de ${produto}:\nPrefixo\tAgência\tCarteira\tTipo\tOrçado\tRealizado\n0001\tCentral\t001\tPF\t50000\t30000`}
+                className="bb-input"
+                style={{ 
+                  minHeight: '120px', 
+                  fontFamily: 'monospace', 
+                  fontSize: '12px',
+                  whiteSpace: 'pre',
+                  overflowX: 'auto'
+                }}
+              />
+            </div>
+
+            <button 
+              onClick={() => handlePasteDataProduto(produto)} 
+              className="bb-btn bb-btn-primary"
+              style={{ marginBottom: '16px' }}
+            >
+              <Upload size={16} />
+              Carregar Dados de {produto}
+            </button>
+
+            {/* Mapeamento de Colunas */}
+            {estado.headers && estado.headers.length > 0 && (
+              <div style={{ marginTop: '16px', marginBottom: '16px', padding: '16px', background: '#f8f9fa', borderRadius: '8px' }}>
+                <h4 style={{ fontSize: '14px', fontWeight: 600, marginBottom: '12px' }}>
+                  Mapeamento de Colunas - {produto}
+                </h4>
+                
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
+                  {['prefixo', 'agencia', 'carteira', 'tipoCarteira', 'orcado', 'realizado'].map(field => (
+                    <div key={field}>
+                      <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, marginBottom: '4px' }}>
+                        {field === 'prefixo' ? 'Prefixo *' : 
+                         field === 'agencia' ? 'Agência' :
+                         field === 'carteira' ? 'Carteira *' : 
+                         field === 'tipoCarteira' ? 'Tipo' :
+                         field === 'orcado' ? 'Orçado *' : 'Realizado'}
+                      </label>
+                      <select
+                        value={estado.columnMapping?.[field] || ''}
+                        onChange={(e) => setEstadoPorProduto(prev => ({
+                          ...prev,
+                          [produto]: {
+                            ...prev[produto],
+                            columnMapping: {
+                              ...prev[produto].columnMapping,
+                              [field]: e.target.value
+                            }
+                          }
+                        }))}
+                        className="bb-input"
+                        style={{ fontSize: '11px' }}
+                      >
+                        <option value="">-- Selecione --</option>
+                        {estado.headers.map((h, idx) => (
+                          <option key={idx} value={idx}>{h}</option>
+                        ))}
+                      </select>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* % Meta do produto */}
+            {estado.headers && estado.headers.length > 0 && (
+              <div style={{ marginTop: '16px', marginBottom: '16px', padding: '16px', background: '#fff3e0', borderRadius: '8px', border: '2px solid #ff9800' }}>
+                <h4 style={{ fontSize: '14px', fontWeight: 600, marginBottom: '12px', color: '#e65100' }}>
+                  <Percent size={16} style={{ display: 'inline', marginRight: '8px' }} />
+                  % Meta do Desafio - {produto}
+                </h4>
+                
+                <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, fontSize: '16px', color: '#e65100' }}>
+                      {estado.metaPercentual || 100}%
+                    </label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="200"
+                      value={estado.metaPercentual || 100}
+                      onChange={(e) => setEstadoPorProduto(prev => ({
+                        ...prev,
+                        [produto]: { ...prev[produto], metaPercentual: Number(e.target.value) }
+                      }))}
+                      style={{ width: '100%', height: '8px' }}
+                    />
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#666', marginTop: '4px' }}>
+                      <span>0%</span>
+                      <span>100%</span>
+                      <span>200%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Botão Salvar */}
+            {estado.headers && estado.headers.length > 0 && (
+              <button 
+                onClick={() => handleSalvarDadosProduto(produto)} 
+                className="bb-btn bb-btn-primary"
+                style={{ width: '100%' }}
+              >
+                <Save size={16} />
+                Salvar {produto} - Dia {diaAtual}
+              </button>
+            )}
+
+            {/* Mostrar quantos registros salvos */}
+            {dadosDoProduto.length > 0 && (
+              <div style={{ marginTop: '16px', padding: '12px', background: '#e8f5e9', borderRadius: '8px' }}>
+                <p style={{ fontSize: '14px', fontWeight: 600, color: '#2e7d32' }}>
+                  ✅ {dadosDoProduto.length} carteiras salvas para {produto}
+                </p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '8px' }}>
+                  {Array.from(new Set(dadosDoProduto.map(d => d.dia))).sort((a, b) => a - b).map(dia => {
+                    const count = dadosDoProduto.filter(d => d.dia === dia).length;
+                    return (
+                      <span key={dia} className="bb-badge bb-badge-success">
+                        Dia {dia}: {count}
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })}
+
+      {/* Tabelas de Resumo */}
       {orcamentoPorAgencia.length > 0 && (
-        <div className="bb-card">
-          <div className="bb-card-header">
-            <h2 className="bb-card-title">Orçamento por Agência</h2>
-          </div>
+        <>
+          {/* Orçamento por Agência */}
+          <div className="bb-card">
+            <div className="bb-card-header">
+              <h2 className="bb-card-title">Orçamento por Agência</h2>
+              <p className="bb-card-subtitle">Soma dos orçamentos efetivos por agência</p>
+            </div>
 
-          <div style={{ overflowX: 'auto' }}>
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Prefixo</th>
-                  <th>Agência</th>
-                  {produtosArray.map(produto => (
-                    <th key={produto} style={{ textAlign: 'right' }}>
-                      {produto}<br/>
-                      <span style={{ fontSize: '11px', fontWeight: 'normal' }}>Orçado Efetivo</span>
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {orcamentoPorAgencia.map((agencia, idx) => (
-                  <tr key={idx}>
-                    <td style={{ fontWeight: 600 }}>{agencia.prefixo}</td>
-                    <td>{agencia.agencia}</td>
+            <div style={{ overflowX: 'auto' }}>
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>Prefixo</th>
+                    <th>Agência</th>
                     {produtosArray.map(produto => (
-                      <td key={produto} style={{ textAlign: 'right', fontWeight: 600, color: 'var(--bb-blue)' }}>
-                        {formatCurrency(agencia.orcadoEfetivoPorProduto?.[produto] || 0)}
-                      </td>
+                      <th key={produto} style={{ textAlign: 'right' }}>
+                        {produto}<br/>
+                        <span style={{ fontSize: '11px', fontWeight: 'normal' }}>Orçado Efetivo</span>
+                      </th>
                     ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* Seção 4: Orçamento por Tipo × Produto */}
-      {orcamentoPorTipo.length > 0 && (
-        <div className="bb-card">
-          <div className="bb-card-header">
-            <h2 className="bb-card-title">Orçamento por Tipo × Produto</h2>
-          </div>
-
-          <div style={{ overflowX: 'auto' }}>
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Tipo de Carteira</th>
-                  <th>Qtd. Carteiras</th>
-                  {produtosArray.map(produto => (
-                    <th key={produto} style={{ textAlign: 'right' }}>
-                      {produto}<br/>
-                      <span style={{ fontSize: '11px', fontWeight: 'normal' }}>Total Efetivo</span>
-                    </th>
+                </thead>
+                <tbody>
+                  {orcamentoPorAgencia.map((agencia, idx) => (
+                    <tr key={idx}>
+                      <td style={{ fontWeight: 600 }}>{agencia.prefixo}</td>
+                      <td>{agencia.agencia}</td>
+                      {produtosArray.map(produto => (
+                        <td key={produto} style={{ textAlign: 'right', fontWeight: 600, color: 'var(--bb-blue)' }}>
+                          {formatCurrency(agencia.orcadoEfetivoPorProduto[produto] || 0)}
+                        </td>
+                      ))}
+                    </tr>
                   ))}
-                </tr>
-              </thead>
-              <tbody>
-                {orcamentoPorTipo.map((tipo, idx) => (
-                  <tr key={idx}>
-                    <td style={{ fontWeight: 600 }}>{tipo.tipo}</td>
-                    <td>{tipo.qtdCarteiras} carteiras</td>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Orçamento por Tipo × Produto */}
+          <div className="bb-card">
+            <div className="bb-card-header">
+              <h2 className="bb-card-title">Orçamento por Tipo × Produto</h2>
+            </div>
+
+            <div style={{ overflowX: 'auto' }}>
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>Tipo de Carteira</th>
+                    <th>Qtd. Carteiras</th>
                     {produtosArray.map(produto => (
-                      <td key={produto} style={{ textAlign: 'right', fontWeight: 600, color: 'var(--bb-blue)' }}>
-                        {formatCurrency(tipo.orcadoEfetivoPorProduto?.[produto] || 0)}
-                      </td>
+                      <th key={produto} style={{ textAlign: 'right' }}>
+                        {produto}<br/>
+                        <span style={{ fontSize: '11px', fontWeight: 'normal' }}>Total Efetivo</span>
+                      </th>
                     ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {orcamentoPorTipo.map((tipo, idx) => (
+                    <tr key={idx}>
+                      <td style={{ fontWeight: 600 }}>{tipo.tipo}</td>
+                      <td>{tipo.qtdCarteiras} carteiras</td>
+                      {produtosArray.map(produto => (
+                        <td key={produto} style={{ textAlign: 'right', fontWeight: 600, color: 'var(--bb-blue)' }}>
+                          {formatCurrency(tipo.orcadoEfetivoPorProduto[produto] || 0)}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
-      )}
-
-      {/* Resumo de Dados Salvos */}
-      {orcadosPorCarteira.length > 0 && (
-        <div className="bb-card">
-          <div className="bb-card-header">
-            <h2 className="bb-card-title">Dados Salvos por Dia</h2>
-          </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-            {Array.from({ length: challengeDias }, (_, i) => i + 1).map(dia => {
-              const count = orcadosPorCarteira.filter(item => item.dia === dia).length;
-              return count > 0 ? (
-                <span key={dia} className="bb-badge bb-badge-success">
-                  Dia {dia}: {count} registros
-                </span>
-              ) : null;
-            })}
-          </div>
-        </div>
+        </>
       )}
     </div>
   );
