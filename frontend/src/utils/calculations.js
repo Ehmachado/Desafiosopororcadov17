@@ -43,13 +43,9 @@ export const calculateOrcadoPorAgencia = (prefixo, carteiras, orcadosPorTipo, or
     
     // Se produto for especificado, somar apenas esse produto
     if (produto) {
-      const total = carteirasDestePrefixo.reduce((sum, carteira) => {
-        // Usar orcadoEfetivoPorProduto se disponível
-        if (carteira.orcadoEfetivoPorProduto && carteira.orcadoEfetivoPorProduto[produto] !== undefined) {
-          return sum + parseNumericValue(carteira.orcadoEfetivoPorProduto[produto]);
-        }
-        return sum;
-      }, 0);
+      const total = carteirasDestePrefixo
+        .filter(c => c.produto === produto)
+        .reduce((sum, carteira) => sum + parseNumericValue(carteira.orcadoEfetivo || 0), 0);
       
       console.log(`💰 Total orçado para ${prefixo} - ${produto}: R$ ${total.toFixed(2)}`);
       return total;
@@ -57,14 +53,7 @@ export const calculateOrcadoPorAgencia = (prefixo, carteiras, orcadosPorTipo, or
     
     // Caso contrário, somar todos os produtos
     const total = carteirasDestePrefixo.reduce((sum, carteira) => {
-      if (carteira.orcadoEfetivoPorProduto) {
-        const totalCarteira = Object.values(carteira.orcadoEfetivoPorProduto).reduce(
-          (s, val) => s + parseNumericValue(val), 
-          0
-        );
-        return sum + totalCarteira;
-      }
-      return sum;
+      return sum + parseNumericValue(carteira.orcadoEfetivo || 0);
     }, 0);
     
     console.log(`💰 Total orçado para ${prefixo}: R$ ${total.toFixed(2)} (${carteirasDestePrefixo.length} carteiras)`);
