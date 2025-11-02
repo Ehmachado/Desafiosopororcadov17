@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Fragment } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { FileDown, Image, Layers, RefreshCw, Download } from 'lucide-react';
 import { formatCurrency, formatPercentage } from '../utils/dataParser';
@@ -656,7 +656,7 @@ const RankingExport = () => {
                           const headerBg = headerCores[pIdx % headerCores.length];
                           
                           return (
-                            <React.Fragment key={produto}>
+                            <Fragment key={produto}>
                               <th style={{ padding, textAlign: 'right', fontSize, fontWeight: '600', position: 'sticky', top: 0, background: headerBg, whiteSpace: 'nowrap' }}>
                                 {produto}<br/>Orçado
                               </th>
@@ -666,7 +666,7 @@ const RankingExport = () => {
                               <th style={{ padding, textAlign: 'right', fontSize, fontWeight: '600', position: 'sticky', top: 0, background: headerBg, whiteSpace: 'nowrap' }}>
                                 {produto}<br/>%
                               </th>
-                            </React.Fragment>
+                            </Fragment>
                           );
                         })}
                       </tr>
@@ -700,7 +700,7 @@ const RankingExport = () => {
                               const bgProduto = idx % 2 === 0 ? corProduto.bg : corProduto.bgAlt;
                               
                               return (
-                                <React.Fragment key={produto}>
+                                <Fragment key={produto}>
                                   <td style={{ 
                                     padding, 
                                     fontSize, 
@@ -728,7 +728,7 @@ const RankingExport = () => {
                                   }}>
                                     {formatPercentage(item.atingimentos[produto] || 0)}
                                   </td>
-                                </React.Fragment>
+                                </Fragment>
                               );
                             })}
                           </tr>
