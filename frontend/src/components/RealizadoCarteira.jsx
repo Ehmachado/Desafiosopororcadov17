@@ -9,10 +9,12 @@ import { toast } from 'sonner';
 const TARGET_COLUMNS = ['Prefixo', 'Carteira', 'TipoCarteira', 'Valor'];
 
 const RealizadoCarteira = () => {
+  const [produtos] = useLocalStorage('challenge_produtos', []);
   const [diasDesafio] = useLocalStorage('challenge_dias', 1);
   const [realizados, setRealizados] = useLocalStorage('realizados_carteira', []);
   const [realizadosDiarios, setRealizadosDiarios] = useLocalStorage('realizados_carteira_diarios', []);
   const [selectedDay, setSelectedDay] = useState(1);
+  const [selectedProduto, setSelectedProduto] = useState('');
   const [inputText, setInputText] = useState('');
   const [parsedRows, setParsedRows] = useState([]);
   const [columnMapping, setColumnMapping] = useState({});
@@ -60,12 +62,13 @@ const RealizadoCarteira = () => {
       return;
     }
 
-    // Remove dados do mesmo dia antes de salvar
-    const updated = realizadosDiarios.filter(r => r.dia !== selectedDay);
+    // Remove dados do mesmo dia e produto antes de salvar
+    const updated = realizadosDiarios.filter(r => !(r.dia === selectedDay && r.produto === (selectedProduto || 'Total')));
 
     const dailyData = previewData.map(item => ({
       ...item,
-      dia: selectedDay
+      dia: selectedDay,
+      produto: selectedProduto || 'Total'
     }));
 
     setRealizadosDiarios([...updated, ...dailyData]);
@@ -78,9 +81,9 @@ const RealizadoCarteira = () => {
   };
 
   const handleClearDiario = () => {
-    const updated = realizadosDiarios.filter(r => r.dia !== selectedDay);
+    const updated = realizadosDiarios.filter(r => !(r.dia === selectedDay && r.produto === (selectedProduto || 'Total')));
     setRealizadosDiarios(updated);
-    toast.success(`Dados do Dia ${selectedDay} por carteira removidos!`);
+    toast.success(`Dados do Dia ${selectedDay} - ${selectedProduto || 'Total'} por carteira removidos!`);
   };
 
   // Calcular acumulado total por carteira e por agência
@@ -152,6 +155,23 @@ const RealizadoCarteira = () => {
           Controle Diário do Desafio
         </h3>
         <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <div>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#1565c0' }}>
+              Produto:
+            </label>
+            <select
+              value={selectedProduto}
+              onChange={(e) => setSelectedProduto(e.target.value)}
+              className="bb-input"
+              style={{ maxWidth: '200px' }}
+              data-testid="produto-select-carteira"
+            >
+              <option value="">Total</option>
+              {produtos.map((produto, idx) => (
+                <option key={idx} value={produto}>{produto}</option>
+              ))}
+            </select>
+          </div>
           <div>
             <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#1565c0' }}>
               Dia do Desafio:
