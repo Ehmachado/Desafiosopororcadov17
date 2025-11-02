@@ -61,6 +61,12 @@ export const exportToPNG = async (elementId, filename = 'ranking.png') => {
   }
 };
 
+// Função para exportar um painel individual
+export const exportPainelIndividual = async (elementId, nomePainel, nomeDesafio) => {
+  const filename = `ranking-${nomePainel.replace(/\s+/g, '-')}-${nomeDesafio || 'desafio'}.png`;
+  await exportToPNG(elementId, filename);
+};
+
 // Função auxiliar para remover bordas brancas do canvas
 const trimCanvas = (canvas) => {
   const ctx = canvas.getContext('2d');
@@ -182,60 +188,90 @@ export const THEME_VARIANTS = [
     name: 'Clássico BB',
     headerBg: 'linear-gradient(135deg, #003399 0%, #2a56c6 100%)',
     headerColor: 'white',
-    accentColor: '#ffcc00'
+    accentColor: '#ffcc00',
+    lineColor: '#003399',
+    secondaryLineColor: '#2a56c6',
+    tertiaryLineColor: '#4a76e6'
   },
   {
     name: 'Moderno',
     headerBg: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)',
     headerColor: 'white',
-    accentColor: '#fbbf24'
+    accentColor: '#fbbf24',
+    lineColor: '#1e3a8a',
+    secondaryLineColor: '#3b82f6',
+    tertiaryLineColor: '#60a5fa'
   },
   {
     name: 'Elegante',
     headerBg: 'linear-gradient(135deg, #1f2937 0%, #374151 100%)',
     headerColor: 'white',
-    accentColor: '#10b981'
+    accentColor: '#10b981',
+    lineColor: '#1f2937',
+    secondaryLineColor: '#374151',
+    tertiaryLineColor: '#4b5563'
   },
   {
     name: 'Vibrante',
     headerBg: 'linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%)',
     headerColor: 'white',
-    accentColor: '#fbbf24'
+    accentColor: '#fbbf24',
+    lineColor: '#7c3aed',
+    secondaryLineColor: '#8b5cf6',
+    tertiaryLineColor: '#a78bfa'
   },
   {
     name: 'Ocean',
     headerBg: 'linear-gradient(135deg, #0891b2 0%, #06b6d4 100%)',
     headerColor: 'white',
-    accentColor: '#fbbf24'
+    accentColor: '#fbbf24',
+    lineColor: '#0891b2',
+    secondaryLineColor: '#06b6d4',
+    tertiaryLineColor: '#22d3ee'
   },
   {
     name: 'Sunset',
     headerBg: 'linear-gradient(135deg, #dc2626 0%, #f97316 100%)',
     headerColor: 'white',
-    accentColor: '#fef3c7'
+    accentColor: '#fef3c7',
+    lineColor: '#dc2626',
+    secondaryLineColor: '#ef4444',
+    tertiaryLineColor: '#f97316'
   },
   {
     name: 'Forest',
     headerBg: 'linear-gradient(135deg, #065f46 0%, #059669 100%)',
     headerColor: 'white',
-    accentColor: '#fde68a'
+    accentColor: '#fde68a',
+    lineColor: '#065f46',
+    secondaryLineColor: '#047857',
+    tertiaryLineColor: '#059669'
   },
   {
     name: 'Royal',
     headerBg: 'linear-gradient(135deg, #4c1d95 0%, #7c3aed 100%)',
     headerColor: 'white',
-    accentColor: '#fcd34d'
+    accentColor: '#fcd34d',
+    lineColor: '#4c1d95',
+    secondaryLineColor: '#6d28d9',
+    tertiaryLineColor: '#7c3aed'
   },
   {
     name: 'Corporate',
     headerBg: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
     headerColor: 'white',
-    accentColor: '#38bdf8'
+    accentColor: '#38bdf8',
+    lineColor: '#0f172a',
+    secondaryLineColor: '#1e293b',
+    tertiaryLineColor: '#334155'
   },
   {
     name: 'Professional',
     headerBg: 'linear-gradient(135deg, #1e40af 0%, #2563eb 100%)',
     headerColor: 'white',
-    accentColor: '#fbbf24'
+    accentColor: '#fbbf24',
+    lineColor: '#1e40af',
+    secondaryLineColor: '#1d4ed8',
+    tertiaryLineColor: '#2563eb'
   }
 ];

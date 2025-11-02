@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
-import { FileDown, Image, Layers, RefreshCw } from 'lucide-react';
+import { FileDown, Image, Layers, RefreshCw, Download } from 'lucide-react';
 import { formatCurrency, formatPercentage } from '../utils/dataParser';
 import { 
   calculateOrcadoPorAgencia, 
@@ -12,7 +12,7 @@ import {
   groupByRede,
   sortByScoreMedio
 } from '../utils/calculations';
-import { exportToPNG, exportAllRedes, THEME_VARIANTS } from '../utils/exportUtils';
+import { exportToPNG, exportAllRedes, exportPainelIndividual, THEME_VARIANTS } from '../utils/exportUtils';
 import { toast } from 'sonner';
 
 const RankingExport = () => {
@@ -31,7 +31,7 @@ const RankingExport = () => {
   const [nomeDesafio, setNomeDesafio] = useLocalStorage('nome_desafio', ''); // Auto-save no localStorage
   const [nomeSuper, setNomeSuper] = useLocalStorage('nome_super', ''); // Nome da Super Regional
   const [simboloSuper, setSimboloSuper] = useLocalStorage('simbolo_super', ''); // Imagem da Super (base64)
-  const [temaIndex, setTemaIndex] = useState(0);
+  const [temaIndex, setTemaIndex] = useLocalStorage('tema_index', 0); // Persistência do tema entre abas
   const [baseCalculo, setBaseCalculo] = useState('carteira');
   const [rankingData, setRankingData] = useState([]);
   const [diaFiltro, setDiaFiltro] = useState(null);
@@ -554,7 +554,31 @@ const RankingExport = () => {
             if (dadosRede.length === 0) return null;
 
             return (
-              <div key={rede} id={`ranking-rede-${rede.replace(/\s+/g, '-')}`} style={{ marginBottom: '48px', pageBreakAfter: 'always' }}>
+              <div key={rede} id={`ranking-rede-${rede.replace(/\s+/g, '-')}`} style={{ marginBottom: '48px', pageBreakAfter: 'always', position: 'relative' }}>
+                {/* Botão de exportação individual */}
+                <button
+                  onClick={() => exportPainelIndividual(`ranking-rede-${rede.replace(/\s+/g, '-')}`, rede, nomeDesafio)}
+                  className="bb-btn bb-btn-secondary"
+                  style={{ 
+                    position: 'absolute', 
+                    top: '10px', 
+                    right: '10px', 
+                    zIndex: 10,
+                    padding: '6px 12px',
+                    fontSize: '12px',
+                    background: 'rgba(255,255,255,0.9)',
+                    border: '1px solid #ddd',
+                    borderRadius: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                  title={`Exportar painel ${rede}`}
+                >
+                  <Download size={14} />
+                  Exportar
+                </button>
+                
                 {/* Cabeçalho */}
                 <div style={{ 
                   background: tema.headerBg,
@@ -571,7 +595,7 @@ const RankingExport = () => {
                       justifyContent: 'center',
                       gap: '20px',
                       marginBottom: '20px', 
-                      borderBottom: '2px solid rgba(255,255,255,0.3)', 
+                      borderBottom: '1.4px solid rgba(255,255,255,0.3)', /* Reduzido em 30% de 2px para 1.4px */
                       paddingBottom: '16px' 
                     }}>
                       {simboloSuper && (
@@ -609,7 +633,7 @@ const RankingExport = () => {
                 </div>
 
                 {/* Tabela de Ranking */}
-                <div style={{ overflowX: 'auto', border: '2px solid #e8eef7', borderTop: 'none', borderRadius: '0 0 12px 12px' }}>
+                <div style={{ overflowX: 'auto', border: '1.4px solid #e8eef7', borderTop: 'none', borderRadius: '0 0 12px 12px' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse', background: 'white', fontSize }}>
                     <thead>
                       <tr style={{ background: 'var(--bb-blue)', color: 'white' }}>
@@ -664,7 +688,7 @@ const RankingExport = () => {
                         ];
                         
                         return (
-                          <tr key={idx} style={{ borderBottom: '1px solid #e8eef7', background: rowBgColor }}>
+                          <tr key={idx} style={{ borderBottom: '0.7px solid #e8eef7', background: rowBgColor }}>
                             <td style={{ padding, fontSize, background: rowBgColor }}>{item.prefixo}</td>
                             <td style={{ padding, fontSize, background: rowBgColor }}>{item.agencia}</td>
                             {unidade === 'carteiras' && (
