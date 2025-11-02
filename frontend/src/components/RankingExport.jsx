@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { FileDown, Image, Layers, RefreshCw, Download } from 'lucide-react';
 import { formatCurrency, formatPercentage } from '../utils/dataParser';
