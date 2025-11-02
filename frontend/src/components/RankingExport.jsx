@@ -96,15 +96,15 @@ const RankingExport = () => {
   };
   
   const getHeaderFontSize = () => {
-    if (numProdutos <= 3) return '42px';
-    if (numProdutos <= 5) return '36px';
-    return '32px';
+    if (numProdutos <= 3) return '29.4px'; // Reduzido em 30% de 42px
+    if (numProdutos <= 5) return '25.2px'; // Reduzido em 30% de 36px
+    return '22.4px'; // Reduzido em 30% de 32px
   };
   
   const getSubHeaderFontSize = () => {
-    if (numProdutos <= 3) return '28px';
-    if (numProdutos <= 5) return '24px';
-    return '20px';
+    if (numProdutos <= 3) return '19.6px'; // Reduzido em 30% de 28px
+    if (numProdutos <= 5) return '16.8px'; // Reduzido em 30% de 24px
+    return '14px'; // Reduzido em 30% de 20px
   };
   
   const fontSize = getFontSize();
@@ -636,11 +636,11 @@ const RankingExport = () => {
                 <div style={{ overflowX: 'auto', border: '1.4px solid #e8eef7', borderTop: 'none', borderRadius: '0 0 12px 12px' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse', background: 'white', fontSize }}>
                     <thead>
-                      <tr style={{ background: 'var(--bb-blue)', color: 'white' }}>
-                        <th style={{ padding, textAlign: 'left', fontSize, fontWeight: '600', position: 'sticky', top: 0, background: 'var(--bb-blue)', whiteSpace: 'nowrap' }}>Prefixo</th>
-                        <th style={{ padding, textAlign: 'left', fontSize, fontWeight: '600', position: 'sticky', top: 0, background: 'var(--bb-blue)', whiteSpace: 'nowrap' }}>Dependência</th>
+                      <tr style={{ background: tema.headerBg, color: tema.headerColor }}>
+                        <th style={{ padding, textAlign: 'left', fontSize, fontWeight: '600', position: 'sticky', top: 0, background: tema.headerBg, whiteSpace: 'nowrap' }}>Prefixo</th>
+                        <th style={{ padding, textAlign: 'left', fontSize, fontWeight: '600', position: 'sticky', top: 0, background: tema.headerBg, whiteSpace: 'nowrap' }}>Dependência</th>
                         {unidade === 'carteiras' && (
-                          <th style={{ padding, textAlign: 'left', fontSize, fontWeight: '600', position: 'sticky', top: 0, background: 'var(--bb-blue)', whiteSpace: 'nowrap' }}>Carteira</th>
+                          <th style={{ padding, textAlign: 'left', fontSize, fontWeight: '600', position: 'sticky', top: 0, background: tema.headerBg, whiteSpace: 'nowrap' }}>Carteira</th>
                         )}
                         {(unidade === 'agencia' ? produtosRanking : ['Total']).map((produto, pIdx) => {
                           // Cores mais escuras para os cabeçalhos dos produtos
