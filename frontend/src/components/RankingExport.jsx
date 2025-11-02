@@ -337,7 +337,7 @@ const RankingExport = () => {
     if (carteiras.length > 0) {
       handleAtualizarRanking();
     }
-  }, [unidade, baseCalculo, diaFiltro]);
+  }, [unidade, fonteOrcamento, fonteRealizado, diaFiltro]);
 
   // Escuta o evento de dados salvos no campo 6
   useEffect(() => {
