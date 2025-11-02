@@ -84,9 +84,10 @@ const RankingExport = () => {
   
   // Ajusta tamanho de fonte e padding baseado no número de produtos
   const getFontSize = () => {
-    if (numProdutos <= 3) return '14px';
-    if (numProdutos <= 5) return '12px';
-    return '10px';
+    // Aumenta em 10% o tamanho das fontes que não são títulos
+    if (numProdutos <= 3) return '15.4px'; // 14px + 10%
+    if (numProdutos <= 5) return '13.2px'; // 12px + 10%
+    return '11px'; // 10px + 10%
   };
   
   const getPadding = () => {
@@ -221,16 +222,24 @@ const RankingExport = () => {
         );
         const orcado = orcadoCarteira ? orcadoCarteira.valor * (orcadoCarteira.fatorMeta || 100) / 100 : 0;
 
-        // Usa realizadosDiariosCarteira se houver dados, senão usa realizadosCarteira
+        // Verifica se há dados no campo 6 (realizadosDiariosCarteira) para esta carteira
         let realizado = 0;
-        if (realizadosDiariosCarteira.length > 0) {
-          // Soma todos os dias salvos até diaFiltro para esta carteira
-          const diaLimite = diaFiltro || diasDesafio;
+        const diaLimite = diaFiltro || diasDesafio;
+        
+        // Primeiro, verifica se há dados no campo 6 para esta carteira específica
+        const temDadosCampo6 = realizadosDiariosCarteira.some(r => 
+          r.prefixo === c.prefixo && 
+          r.carteira === c.carteira && 
+          r.dia <= diaLimite
+        );
+        
+        if (temDadosCampo6) {
+          // Se houver dados no campo 6, usa eles
           realizado = realizadosDiariosCarteira
             .filter(r => r.prefixo === c.prefixo && r.carteira === c.carteira && r.dia <= diaLimite)
             .reduce((sum, r) => sum + (parseFloat(r.valor) || 0), 0);
         } else {
-          // Fallback para realizadosCarteira (compatibilidade)
+          // Se não houver dados no campo 6, usa o campo 5
           realizado = calculateRealizadoPorCarteira(c.prefixo, c.carteira, realizadosCarteira, diaFiltro);
         }
         

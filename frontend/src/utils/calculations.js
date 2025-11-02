@@ -162,9 +162,9 @@ export const calculateAtingimento = (realizado, orcado) => {
 };
 
 export const getAtingimentoColor = (percentage) => {
-  if (percentage >= 90) return '#28a745'; // Green
-  if (percentage >= 60) return '#ffc107'; // Yellow
-  return '#dc3545'; // Red
+  if (percentage >= 90) return '#28a745'; // Verde
+  if (percentage >= 60) return '#f59e0b'; // Amarelo mais escuro e vibrante
+  return '#dc3545'; // Vermelho
 };
 
 export const getAtingimentoClass = (percentage) => {
