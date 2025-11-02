@@ -83,11 +83,12 @@ const RealizadoCarteira = () => {
     toast.success(`Dados do Dia ${selectedDay} por carteira removidos!`);
   };
 
-  // Calcular acumulado total por carteira
+  // Calcular acumulado total por carteira e por agência
   const realizadoAcumulado = useMemo(() => {
-    const acumulado = [];
     const porCarteira = {};
+    const porAgencia = {};
 
+    // Primeiro, calcula por carteira
     realizadosDiarios
       .filter(r => r.dia <= selectedDay)
       .forEach(r => {
@@ -101,9 +102,22 @@ const RealizadoCarteira = () => {
           };
         }
         porCarteira[key].valor += r.valor;
+
+        // Também soma por agência
+        if (!porAgencia[r.prefixo]) {
+          porAgencia[r.prefixo] = {
+            prefixo: r.prefixo,
+            valor: 0
+          };
+        }
+        porAgencia[r.prefixo].valor += r.valor;
       });
 
-    return Object.values(porCarteira);
+    // Retorna ambos os acumulados
+    return {
+      porCarteira: Object.values(porCarteira),
+      porAgencia: Object.values(porAgencia)
+    };
   }, [realizadosDiarios, selectedDay]);
 
   return (
@@ -258,7 +272,40 @@ const RealizadoCarteira = () => {
             </p>
           </div>
 
+          {/* Sumarizado por Agência */}
+          <div style={{ marginBottom: '32px' }}>
+            <h4 style={{ fontSize: '16px', fontWeight: 600, color: '#2c5282', marginBottom: '12px' }}>
+              Sumarizado por Agência
+            </h4>
+            <div style={{ overflowX: 'auto' }}>
+              <table className="bb-table">
+                <thead>
+                  <tr>
+                    <th>Prefixo</th>
+                    <th>Valor Acumulado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {realizadoAcumulado.porAgencia
+                    .sort((a, b) => a.prefixo.localeCompare(b.prefixo))
+                    .map((item, index) => (
+                      <tr key={index}>
+                        <td>{item.prefixo}</td>
+                        <td style={{ fontWeight: 600, color: 'var(--bb-blue)' }}>
+                          {item.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Detalhado por Carteira */}
           <div style={{ overflowX: 'auto' }}>
+            <h4 style={{ fontSize: '16px', fontWeight: 600, color: '#2c5282', marginBottom: '12px' }}>
+              Detalhado por Carteira
+            </h4>
             <table className="bb-table">
               <thead>
                 <tr>
@@ -269,7 +316,7 @@ const RealizadoCarteira = () => {
                 </tr>
               </thead>
               <tbody>
-                {realizadoAcumulado
+                {realizadoAcumulado.porCarteira
                   .sort((a, b) => a.prefixo.localeCompare(b.prefixo))
                   .map((item, index) => (
                     <tr key={index}>

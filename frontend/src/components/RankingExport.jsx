@@ -67,7 +67,7 @@ const RankingExport = () => {
     toast.success('Imagem removida!');
   };
 
-  const hasCarteirasData = realizadosCarteira.length > 0;
+  const hasCarteirasData = realizadosCarteira.length > 0 || realizadosDiariosCarteira.length > 0;
   const tema = THEME_VARIANTS[temaIndex];
 
   // Garantir que produtos seja um array
