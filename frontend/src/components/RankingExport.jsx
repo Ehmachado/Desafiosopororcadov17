@@ -347,15 +347,13 @@ const RankingExport = () => {
   return (
     <div>
       <div className="bb-card">
-        {/* Cabeçalho e Configurações - não devem aparecer na exportação */}
-        <div className="no-export">
-          <div className="bb-card-header">
-            <h2 className="bb-card-title" data-testid="ranking-export-title">Campo 8 — Ranking & Exportação</h2>
-            <p className="bb-card-subtitle">Configure, visualize e exporte o ranking do desafio</p>
-          </div>
+        <div className="bb-card-header no-export">
+          <h2 className="bb-card-title" data-testid="ranking-export-title">Campo 8 — Ranking & Exportação</h2>
+          <p className="bb-card-subtitle">Configure, visualize e exporte o ranking do desafio</p>
+        </div>
 
         {/* Configurações */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+        <div className="no-export" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px', marginBottom: '24px' }}>
           <div>
             <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: 'var(--bb-gray-700)', fontSize: '14px' }}>
               Unidade do Ranking:
@@ -500,7 +498,7 @@ const RankingExport = () => {
 
         {/* Última Atualização */}
         {ultimaAtualizacao && (
-          <div style={{ 
+          <div className="no-export" style={{ 
             padding: '12px 16px', 
             background: '#e8f4f8', 
             borderRadius: '8px', 
@@ -518,8 +516,8 @@ const RankingExport = () => {
           </div>
         )}
 
-          {/* Botões de Ação */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginBottom: '24px' }}>
+        {/* Botões de Ação */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginBottom: '24px' }} className="no-export">
           <button
             onClick={handleAtualizarRanking}
             className="bb-btn bb-btn-primary"
@@ -577,7 +575,7 @@ const RankingExport = () => {
                 {/* Botão de exportação individual */}
                 <button
                   onClick={() => exportPainelIndividual(`ranking-rede-${rede.replace(/\s+/g, '-')}`, rede, nomeDesafio)}
-                  className="bb-btn bb-btn-secondary"
+                  className="bb-btn bb-btn-secondary no-export"
                   style={{ 
                     position: 'absolute', 
                     top: '10px', 

@@ -31,13 +31,8 @@ export const exportToPNG = async (elementId, filename = 'ranking.png') => {
     
     // Esconde temporariamente elementos que não devem ser exportados
     const noExportElements = element.getElementsByClassName('no-export');
-    const originalDisplays = [];
     Array.from(noExportElements).forEach(el => {
-      originalDisplays.push(el.style.display);
-      el.style.visibility = 'hidden';
-      el.style.position = 'absolute';
-      el.style.pointerEvents = 'none';
-      el.style.opacity = '0';
+      el.style.display = 'none';
     });
 
     const canvas = await html2canvas(element, {
@@ -54,17 +49,12 @@ export const exportToPNG = async (elementId, filename = 'ranking.png') => {
       scrollY: 0,
       x: 0,
       y: 0,
-      foreignObjectRendering: false,
-      ignoreElements: (element) => element.classList.contains('no-export')
+      foreignObjectRendering: false
     });
 
     // Restaura a visibilidade dos elementos
-    Array.from(noExportElements).forEach((el, index) => {
-      el.style.visibility = '';
-      el.style.position = '';
-      el.style.pointerEvents = '';
-      el.style.opacity = '';
-      el.style.display = originalDisplays[index];
+    Array.from(noExportElements).forEach(el => {
+      el.style.display = 'flex';
     });
     
     // Restaura o overflow original
