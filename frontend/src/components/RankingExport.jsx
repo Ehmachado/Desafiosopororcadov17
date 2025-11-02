@@ -595,7 +595,7 @@ const RankingExport = () => {
                       justifyContent: 'center',
                       gap: '20px',
                       marginBottom: '20px', 
-                      borderBottom: '1.4px solid rgba(255,255,255,0.3)', /* Reduzido em 30% de 2px para 1.4px */
+                      borderBottom: '0.98px solid rgba(255,255,255,0.3)', /* Reduzido em mais 30% de 1.4px para 0.98px */
                       paddingBottom: '16px' 
                     }}>
                       {simboloSuper && (
@@ -677,7 +677,8 @@ const RankingExport = () => {
                         const rowBgColor = idx % 2 === 0 ? '#ffffff' : '#f0f4f8';
                         
                         // Array de cores suaves para cada produto
-                        const produtoCores = [
+                        // Cores para tema claro
+                        const coresClaro = [
                           { bg: '#e3f2fd', bgAlt: '#d1e7f7' }, // Azul claro
                           { bg: '#fff3e0', bgAlt: '#ffe4c4' }, // Laranja claro
                           { bg: '#e8f5e9', bgAlt: '#d4ead5' }, // Verde claro
@@ -686,6 +687,20 @@ const RankingExport = () => {
                           { bg: '#fce4ec', bgAlt: '#f8d0dd' }, // Rosa claro
                           { bg: '#e0f2f1', bgAlt: '#c8e6e4' }, // Ciano claro
                         ];
+                        
+                        // Cores para tema escuro
+                        const coresEscuro = [
+                          { bg: '#1a3a5f', bgAlt: '#0d2845' }, // Azul escuro
+                          { bg: '#4d3319', bgAlt: '#3d2914' }, // Laranja escuro
+                          { bg: '#1e3e2f', bgAlt: '#132a20' }, // Verde escuro
+                          { bg: '#3d2952', bgAlt: '#2b1d3b' }, // Roxo escuro
+                          { bg: '#4d4d1a', bgAlt: '#333314' }, // Amarelo escuro
+                          { bg: '#4d2e39', bgAlt: '#3d252d' }, // Rosa escuro
+                          { bg: '#1a3e3d', bgAlt: '#0d2e2d' }, // Ciano escuro
+                        ];
+                        
+                        // Seleciona as cores com base no tema
+                        const produtoCores = tema.isDark ? coresEscuro : coresClaro;
                         
                         return (
                           <tr key={idx} style={{ borderBottom: '0.7px solid #e8eef7', background: rowBgColor }}>
