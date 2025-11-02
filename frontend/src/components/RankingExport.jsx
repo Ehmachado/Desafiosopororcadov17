@@ -129,13 +129,10 @@ const RankingExport = () => {
         
         // LOG PARA DEBUG
         if (prefixo === carteiras[0]?.prefixo) {
-          console.log('RankingExport - Dados para cálculo:', {
+          console.log('🔍 Calculando ranking para:', {
+            prefixo,
             baseCalculo,
-            useCarteiraBase,
-            temOrcadosPorTipo: orcadosPorTipo && Object.keys(orcadosPorTipo).length > 0,
-            temOrcadosPorCarteiraV2: orcadosPorCarteiraV2 && orcadosPorCarteiraV2.length > 0,
-            orcadosPorTipo,
-            orcadosPorCarteiraV2Length: orcadosPorCarteiraV2?.length
+            useCarteiraBase
           });
         }
         
@@ -333,6 +330,17 @@ const RankingExport = () => {
     }
   }, [unidade, baseCalculo, diaFiltro]);
 
+  // Escuta o evento de dados salvos no campo 6
+  useEffect(() => {
+    const handleCampo6DataSaved = () => {
+      setUnidade('carteiras');
+      handleAtualizarRanking();
+    };
+
+    window.addEventListener('campo6DataSaved', handleCampo6DataSaved);
+    return () => window.removeEventListener('campo6DataSaved', handleCampo6DataSaved);
+  }, []);
+
   const redesAgrupadas = groupByRede(rankingData, redes);
   const redesUnicas = Object.keys(redesAgrupadas);
 
@@ -509,7 +517,7 @@ const RankingExport = () => {
         )}
 
         {/* Botões de Ação */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginBottom: '24px' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginBottom: '24px' }} className="no-export">
           <button
             onClick={handleAtualizarRanking}
             className="bb-btn bb-btn-primary"

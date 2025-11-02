@@ -29,9 +29,15 @@ export const exportToPNG = async (elementId, filename = 'ranking.png') => {
       scale = 1.2;
     }
     
+    // Esconde temporariamente elementos que não devem ser exportados
+    const noExportElements = element.getElementsByClassName('no-export');
+    Array.from(noExportElements).forEach(el => {
+      el.style.display = 'none';
+    });
+
     const canvas = await html2canvas(element, {
       scale: scale,
-      backgroundColor: '#ffffff',
+      backgroundColor: null, // Remove o fundo branco padrão
       logging: false,
       useCORS: true,
       allowTaint: true,
@@ -44,6 +50,11 @@ export const exportToPNG = async (elementId, filename = 'ranking.png') => {
       x: 0,
       y: 0,
       foreignObjectRendering: false
+    });
+
+    // Restaura a visibilidade dos elementos
+    Array.from(noExportElements).forEach(el => {
+      el.style.display = 'flex';
     });
     
     // Restaura o overflow original

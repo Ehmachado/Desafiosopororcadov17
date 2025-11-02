@@ -71,6 +71,10 @@ const RealizadoCarteira = () => {
     setRealizadosDiarios([...updated, ...dailyData]);
     setInputText('');
     toast.success(`Realizado diário do Dia ${selectedDay} por carteira salvo!`);
+
+    // Emite evento para notificar que dados foram salvos no campo 6
+    const event = new CustomEvent('campo6DataSaved');
+    window.dispatchEvent(event);
   };
 
   const handleClearDiario = () => {
