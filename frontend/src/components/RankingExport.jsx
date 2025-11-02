@@ -644,7 +644,7 @@ const RankingExport = () => {
                         )}
                         {(unidade === 'agencia' ? produtosRanking : ['Total']).map((produto, pIdx) => {
                           // Cores mais escuras para os cabeçalhos dos produtos
-                          const headerCores = [
+                          const headerCoresClaro = [
                             '#1976d2', // Azul
                             '#f57c00', // Laranja
                             '#388e3c', // Verde
@@ -653,6 +653,18 @@ const RankingExport = () => {
                             '#c2185b', // Rosa
                             '#00796b', // Ciano
                           ];
+                          
+                          const headerCoresEscuro = [
+                            '#42a5f5', // Azul mais claro
+                            '#ff9800', // Laranja mais claro
+                            '#66bb6a', // Verde mais claro
+                            '#ab47bc', // Roxo mais claro
+                            '#ffca28', // Amarelo mais claro
+                            '#ec407a', // Rosa mais claro
+                            '#26a69a', // Ciano mais claro
+                          ];
+                          
+                          const headerCores = tema.isDark ? headerCoresEscuro : headerCoresClaro;
                           const headerBg = headerCores[pIdx % headerCores.length];
                           
                           return (
