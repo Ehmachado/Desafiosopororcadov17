@@ -33,7 +33,8 @@ const RankingExport = () => {
   const [nomeSuper, setNomeSuper] = useLocalStorage('nome_super', ''); // Nome da Super Regional
   const [simboloSuper, setSimboloSuper] = useLocalStorage('simbolo_super', ''); // Imagem da Super (base64)
   const [temaIndex, setTemaIndex] = useLocalStorage('tema_index', 0); // Persistência do tema entre abas
-  const [baseCalculo, setBaseCalculo] = useState('carteira');
+  const [fonteOrcamento, setFonteOrcamento] = useState('campo3'); // campo3 ou campo31
+  const [fonteRealizado, setFonteRealizado] = useState('campo5'); // campo5 ou campo6
   const [rankingData, setRankingData] = useState([]);
   const [diaFiltro, setDiaFiltro] = useState(null);
   const [ultimaAtualizacao, setUltimaAtualizacao] = useState(null); // Data e hora da última atualização
@@ -124,19 +125,19 @@ const RankingExport = () => {
         const redeInfo = redes.find(r => r.prefixo === prefixo);
         const rede = redeInfo?.rede || 'Sem Rede';
 
-        // SEMPRE passar orcadosPorCarteiraV2, a função decide automaticamente
-        // Se Campo 3 (orcamento_por_tipo) estiver vazio, usa Campo 3.1 (orcados_por_carteira_v2)
-        const useCarteiraBase = baseCalculo === 'carteira';
+        // Determina qual fonte de orçamento usar
+        const useCarteiraBase = fonteOrcamento === 'campo31';
         
         // LOG PARA DEBUG
         if (prefixo === carteiras[0]?.prefixo) {
           console.log('🔍 Calculando ranking para:', {
             prefixo,
-            baseCalculo,
+            fonteOrcamento,
+            fonteRealizado,
             useCarteiraBase
           });
         }
-        
+
         const orcado = calculateOrcadoPorAgencia(prefixo, carteiras, orcadosPorTipo, orcadosPorCarteiraV2, useCarteiraBase);
 
         const atingimentos = {};
@@ -168,28 +169,35 @@ const RankingExport = () => {
           
           orcadosPorProduto[produto] = orcadoProduto;
           
-          // Usa realizadosDiariosTipo se houver dados, senão usa realizadosTipo
+          // Determina qual fonte de realizado usar
           let realizado = 0;
-          if (realizadosDiariosTipo.length > 0) {
-            // Soma todos os dias salvos até diaFiltro para este prefixo e produto
-            const diaLimite = diaFiltro || diasDesafio;
-            realizado = realizadosDiariosTipo
+          const diaLimite = diaFiltro || diasDesafio;
+
+          if (fonteRealizado === 'campo6') {
+            // Usa dados do Campo 6 (Por Carteira)
+            realizado = realizadosDiariosCarteira
               .filter(r => r.prefixo === prefixo && r.produto === produto && r.dia <= diaLimite)
               .reduce((sum, r) => sum + (parseFloat(r.valor) || 0), 0);
-            
-            // Se for Vida Total, soma Vida + Vidinha
-            if (produto === 'Vida Total') {
-              const vida = realizadosDiariosTipo
-                .filter(r => r.prefixo === prefixo && r.produto === 'Vida' && r.dia <= diaLimite)
-                .reduce((sum, r) => sum + (parseFloat(r.valor) || 0), 0);
-              const vidinha = realizadosDiariosTipo
-                .filter(r => r.prefixo === prefixo && r.produto === 'Vidinha' && r.dia <= diaLimite)
-                .reduce((sum, r) => sum + (parseFloat(r.valor) || 0), 0);
-              realizado = vida + vidinha;
-            }
           } else {
-            // Fallback para realizadosTipo (compatibilidade)
-            realizado = calculateRealizadoPorAgencia(prefixo, produto, realizadosTipo, diaFiltro);
+            // Usa dados do Campo 5 (Por Tipo)
+            if (realizadosDiariosTipo.length > 0) {
+              realizado = realizadosDiariosTipo
+                .filter(r => r.prefixo === prefixo && r.produto === produto && r.dia <= diaLimite)
+                .reduce((sum, r) => sum + (parseFloat(r.valor) || 0), 0);
+              
+              // Se for Vida Total, soma Vida + Vidinha
+              if (produto === 'Vida Total') {
+                const vida = realizadosDiariosTipo
+                  .filter(r => r.prefixo === prefixo && r.produto === 'Vida' && r.dia <= diaLimite)
+                  .reduce((sum, r) => sum + (parseFloat(r.valor) || 0), 0);
+                const vidinha = realizadosDiariosTipo
+                  .filter(r => r.prefixo === prefixo && r.produto === 'Vidinha' && r.dia <= diaLimite)
+                  .reduce((sum, r) => sum + (parseFloat(r.valor) || 0), 0);
+                realizado = vida + vidinha;
+              }
+            } else {
+              realizado = calculateRealizadoPorAgencia(prefixo, produto, realizadosTipo, diaFiltro);
+            }
           }
           
           valores[produto] = realizado;
@@ -462,22 +470,35 @@ const RankingExport = () => {
             </select>
           </div>
 
-          {unidade === 'agencia' && (
-            <div>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: 'var(--bb-gray-700)', fontSize: '14px' }}>
-                Base de Cálculo:
-              </label>
-              <select
-                value={baseCalculo}
-                onChange={(e) => setBaseCalculo(e.target.value)}
-                className="bb-input"
-                data-testid="base-calculo-select"
-              >
-                <option value="carteira">Por Carteira</option>
-                <option value="tipo">Por Tipo</option>
-              </select>
-            </div>
-          )}
+          <div>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: 'var(--bb-gray-700)', fontSize: '14px' }}>
+              Fonte do Orçamento:
+            </label>
+            <select
+              value={fonteOrcamento}
+              onChange={(e) => setFonteOrcamento(e.target.value)}
+              className="bb-input"
+              data-testid="fonte-orcamento-select"
+            >
+              <option value="campo3">Campo 3 (Por Tipo)</option>
+              <option value="campo31">Campo 3.1 (Por Carteira)</option>
+            </select>
+          </div>
+
+          <div>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: 'var(--bb-gray-700)', fontSize: '14px' }}>
+              Fonte do Realizado:
+            </label>
+            <select
+              value={fonteRealizado}
+              onChange={(e) => setFonteRealizado(e.target.value)}
+              className="bb-input"
+              data-testid="fonte-realizado-select"
+            >
+              <option value="campo5">Campo 5 (Por Tipo)</option>
+              <option value="campo6">Campo 6 (Por Carteira)</option>
+            </select>
+          </div>
 
           <div>
             <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: 'var(--bb-gray-700)', fontSize: '14px' }}>

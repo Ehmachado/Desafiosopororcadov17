@@ -90,36 +90,54 @@ const RealizadoCarteira = () => {
   const realizadoAcumulado = useMemo(() => {
     const porCarteira = {};
     const porAgencia = {};
+    const porProduto = {};
 
-    // Primeiro, calcula por carteira
+    // Primeiro, calcula por carteira e produto
     realizadosDiarios
       .filter(r => r.dia <= selectedDay)
       .forEach(r => {
         const key = `${r.prefixo}_${r.carteira}_${r.tipoCarteira}`;
-        if (!porCarteira[key]) {
-          porCarteira[key] = {
+        const produto = r.produto || 'Total';
+
+        // Acumula por carteira e produto
+        const carteiraKey = `${key}_${produto}`;
+        if (!porCarteira[carteiraKey]) {
+          porCarteira[carteiraKey] = {
             prefixo: r.prefixo,
             carteira: r.carteira,
             tipoCarteira: r.tipoCarteira,
+            produto,
             valor: 0
           };
         }
-        porCarteira[key].valor += r.valor;
+        porCarteira[carteiraKey].valor += r.valor;
 
-        // Também soma por agência
-        if (!porAgencia[r.prefixo]) {
-          porAgencia[r.prefixo] = {
+        // Acumula por agência e produto
+        const agenciaKey = `${r.prefixo}_${produto}`;
+        if (!porAgencia[agenciaKey]) {
+          porAgencia[agenciaKey] = {
             prefixo: r.prefixo,
+            produto,
             valor: 0
           };
         }
-        porAgencia[r.prefixo].valor += r.valor;
+        porAgencia[agenciaKey].valor += r.valor;
+
+        // Acumula por produto
+        if (!porProduto[produto]) {
+          porProduto[produto] = {
+            produto,
+            valor: 0
+          };
+        }
+        porProduto[produto].valor += r.valor;
       });
 
-    // Retorna ambos os acumulados
+    // Retorna todos os acumulados
     return {
       porCarteira: Object.values(porCarteira),
-      porAgencia: Object.values(porAgencia)
+      porAgencia: Object.values(porAgencia),
+      porProduto: Object.values(porProduto)
     };
   }, [realizadosDiarios, selectedDay]);
 
@@ -292,6 +310,35 @@ const RealizadoCarteira = () => {
             </p>
           </div>
 
+          {/* Sumarizado por Produto */}
+          <div style={{ marginBottom: '32px' }}>
+            <h4 style={{ fontSize: '16px', fontWeight: 600, color: '#2c5282', marginBottom: '12px' }}>
+              Sumarizado por Produto
+            </h4>
+            <div style={{ overflowX: 'auto' }}>
+              <table className="bb-table">
+                <thead>
+                  <tr>
+                    <th>Produto</th>
+                    <th>Valor Acumulado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {realizadoAcumulado.porProduto
+                    .sort((a, b) => a.produto.localeCompare(b.produto))
+                    .map((item, index) => (
+                      <tr key={index}>
+                        <td>{item.produto}</td>
+                        <td style={{ fontWeight: 600, color: 'var(--bb-blue)' }}>
+                          {item.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
           {/* Sumarizado por Agência */}
           <div style={{ marginBottom: '32px' }}>
             <h4 style={{ fontSize: '16px', fontWeight: 600, color: '#2c5282', marginBottom: '12px' }}>
@@ -302,15 +349,17 @@ const RealizadoCarteira = () => {
                 <thead>
                   <tr>
                     <th>Prefixo</th>
+                    <th>Produto</th>
                     <th>Valor Acumulado</th>
                   </tr>
                 </thead>
                 <tbody>
                   {realizadoAcumulado.porAgencia
-                    .sort((a, b) => a.prefixo.localeCompare(b.prefixo))
+                    .sort((a, b) => a.prefixo.localeCompare(b.prefixo) || a.produto.localeCompare(b.produto))
                     .map((item, index) => (
                       <tr key={index}>
                         <td>{item.prefixo}</td>
+                        <td>{item.produto}</td>
                         <td style={{ fontWeight: 600, color: 'var(--bb-blue)' }}>
                           {item.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                         </td>
@@ -332,12 +381,13 @@ const RealizadoCarteira = () => {
                   <th>Prefixo</th>
                   <th>Carteira</th>
                   <th>Tipo Carteira</th>
+                  <th>Produto</th>
                   <th>Valor Acumulado</th>
                 </tr>
               </thead>
               <tbody>
                 {realizadoAcumulado.porCarteira
-                  .sort((a, b) => a.prefixo.localeCompare(b.prefixo))
+                  .sort((a, b) => a.prefixo.localeCompare(b.prefixo) || a.produto.localeCompare(b.produto))
                   .map((item, index) => (
                     <tr key={index}>
                       <td>{item.prefixo}</td>
@@ -347,6 +397,7 @@ const RealizadoCarteira = () => {
                           {item.tipoCarteira}
                         </span>
                       </td>
+                      <td>{item.produto}</td>
                       <td style={{ fontWeight: 600, color: 'var(--bb-blue)' }}>
                         {item.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                       </td>
